@@ -3,1200 +3,690 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>OroDb — SQL Server Intelligence Platform</title>
-<meta name="description" content="Real-time SQL Server performance monitoring. Query fingerprinting, regression detection, incident bundles, and intelligent index recommendations — built for DBAs who need answers fast."/>
-<meta property="og:title" content="OroDb — SQL Server Intelligence Platform"/>
-<meta property="og:description" content="Stop guessing. Start knowing. Real-time SQL Server performance intelligence for DBA teams."/>
+<title>OroDb — SQL Server Performance Investigation Platform</title>
+<meta name="description" content="Real-time SQL Server performance monitoring, query fingerprinting, regression detection, and incident bundles — built for DBA teams who need answers fast, not just dashboards."/>
+<meta property="og:title" content="OroDb — SQL Server Performance Investigation Platform"/>
+<meta property="og:description" content="Not just monitoring. Investigation, workflow, and exportability — built for the DBAs who get paged at 2am."/>
 <meta property="og:type" content="website"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
 <style>
 :root {
-  --bg:        #080a0c;
-  --bg2:       #0d1117;
-  --bg3:       #111820;
-  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.12);
-  --gold:      #c9a84c;
-  --gold2:     #e8c97a;
-  --gold-dim:  rgba(201,168,76,0.15);
-  --gold-glow: rgba(201,168,76,0.08);
-  --cyan:      #00d4ff;
-  --cyan-dim:  rgba(0,212,255,0.1);
-  --red:       #ff4757;
-  --green:     #2ed573;
-  --text:      #e8edf2;
-  --text2:     #8fa3b4;
-  --text3:     #526070;
-  --mono:      'DM Mono', monospace;
-  --sans:      'DM Sans', sans-serif;
-  --display:   'Bebas Neue', sans-serif;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-
-/* ── Noise texture overlay ── */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.025;
-  pointer-events: none;
-  z-index: 1000;
-}
-
-/* ── Typography ── */
-.display { font-family: var(--display); letter-spacing: 0.02em; line-height: 0.95; }
-.mono { font-family: var(--mono); }
-
-/* ── Nav ── */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  padding: 0 48px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(8,10,12,0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-logo {
-  font-family: var(--display);
-  font-size: 28px;
-  letter-spacing: 0.08em;
-  color: var(--gold);
-  text-decoration: none;
-}
-.nav-logo span { color: var(--text3); font-size: 13px; font-family: var(--mono); letter-spacing: 0.1em; margin-left: 8px; vertical-align: middle; }
-
-.nav-links { display: flex; gap: 36px; align-items: center; }
-.nav-links a {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text2);
-  text-decoration: none;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  transition: color 0.2s;
-}
-.nav-links a:hover { color: var(--gold); }
-
-.nav-cta {
-  background: var(--gold);
-  color: #080a0c;
-  padding: 8px 20px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-.nav-cta:hover { background: var(--gold2); transform: translateY(-1px); }
-
-/* ── Hero ── */
-.hero {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 120px 48px 80px;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Grid background */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 20%, transparent 80%);
-}
-
-/* Glow orb */
-.hero::after {
-  content: '';
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 400px;
-  background: radial-gradient(ellipse, rgba(201,168,76,0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.hero-inner {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 980px;
-}
-
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--gold);
-  border: 1px solid var(--gold-dim);
-  padding: 6px 16px;
-  margin-bottom: 40px;
-  background: var(--gold-glow);
-}
-.hero-badge::before {
-  content: '';
-  width: 6px; height: 6px;
-  background: var(--gold);
-  border-radius: 50%;
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
-
-.hero-title {
-  font-family: var(--display);
-  font-size: clamp(72px, 10vw, 140px);
-  line-height: 0.92;
-  letter-spacing: 0.03em;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-.hero-title .gold { color: var(--gold); }
-.hero-title .dim { color: var(--text3); }
-
-.hero-sub {
-  font-family: var(--display);
-  font-size: clamp(20px, 3vw, 36px);
-  letter-spacing: 0.12em;
-  color: var(--text3);
-  margin-bottom: 40px;
-}
-
-.hero-desc {
-  font-size: 18px;
-  font-weight: 300;
-  color: var(--text2);
-  line-height: 1.7;
-  max-width: 600px;
-  margin: 0 auto 52px;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn-primary {
-  background: var(--gold);
-  color: #080a0c;
-  padding: 14px 36px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  transition: background 0.2s, transform 0.15s;
-}
-.btn-primary:hover { background: var(--gold2); transform: translateY(-2px); }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text2);
-  padding: 14px 36px;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 1px solid var(--border2);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  transition: color 0.2s, border-color 0.2s, transform 0.15s;
-}
-.btn-ghost:hover { color: var(--gold); border-color: var(--gold-dim); transform: translateY(-2px); }
-
-/* ── Stats bar ── */
-.stats-bar {
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 32px 48px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-}
-.stat-item {
-  background: var(--bg2);
-  padding: 28px 32px;
-  text-align: center;
-}
-.stat-num {
-  font-family: var(--display);
-  font-size: 52px;
-  letter-spacing: 0.04em;
-  color: var(--gold);
-  line-height: 1;
-  margin-bottom: 6px;
-}
-.stat-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--text3);
-}
-
-/* ── Sections ── */
-section { padding: 100px 48px; }
-
-.section-tag {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.section-tag::before {
-  content: '//';
-  color: var(--text3);
-}
-
-.section-title {
-  font-family: var(--display);
-  font-size: clamp(48px, 6vw, 80px);
-  line-height: 0.95;
-  letter-spacing: 0.03em;
-  margin-bottom: 24px;
-}
-
-.section-desc {
-  font-size: 17px;
-  font-weight: 300;
-  color: var(--text2);
-  line-height: 1.7;
-  max-width: 560px;
-}
-
-/* ── Features grid ── */
-.features-section { background: var(--bg); }
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  margin-top: 72px;
-}
-
-.feature-card {
-  background: var(--bg2);
-  padding: 40px 36px;
-  position: relative;
-  overflow: hidden;
-  transition: background 0.3s;
-}
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--gold);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.4s ease;
-}
-.feature-card:hover { background: var(--bg3); }
-.feature-card:hover::before { transform: scaleX(1); }
-
-.feature-icon {
-  font-family: var(--mono);
-  font-size: 28px;
-  color: var(--gold);
-  margin-bottom: 20px;
-  display: block;
-  opacity: 0.8;
-}
-
-.feature-title {
-  font-family: var(--display);
-  font-size: 26px;
-  letter-spacing: 0.04em;
-  color: var(--text);
-  margin-bottom: 12px;
-}
-
-.feature-desc {
-  font-size: 14px;
-  font-weight: 300;
-  color: var(--text2);
-  line-height: 1.7;
-}
-
-.feature-tag {
-  margin-top: 24px;
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--gold);
-  border: 1px solid var(--gold-dim);
-  padding: 4px 10px;
-  background: var(--gold-glow);
-}
-
-/* ── How it works ── */
-.how-section {
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.how-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  align-items: center;
-  margin-top: 72px;
-}
-
-.how-steps { display: flex; flex-direction: column; gap: 0; }
-
-.how-step {
-  display: flex;
-  gap: 28px;
-  padding: 32px 0;
-  border-bottom: 1px solid var(--border);
-  position: relative;
-}
-.how-step:last-child { border-bottom: none; }
-
-.step-num {
-  font-family: var(--display);
-  font-size: 56px;
-  color: var(--border2);
-  line-height: 1;
-  flex-shrink: 0;
-  width: 52px;
-  transition: color 0.3s;
-}
-.how-step:hover .step-num { color: var(--gold); }
-
-.step-content {}
-.step-title {
-  font-family: var(--display);
-  font-size: 22px;
-  letter-spacing: 0.05em;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-.step-desc {
-  font-size: 14px;
-  font-weight: 300;
-  color: var(--text2);
-  line-height: 1.6;
-}
-
-/* Terminal mock */
-.terminal {
-  background: #060809;
-  border: 1px solid var(--border2);
-  font-family: var(--mono);
-  font-size: 13px;
-  line-height: 1.8;
-  overflow: hidden;
-}
-.terminal-bar {
-  background: var(--bg3);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border-bottom: 1px solid var(--border);
-}
-.dot { width: 10px; height: 10px; border-radius: 50%; }
-.dot-r { background: #ff5f57; }
-.dot-y { background: #febc2e; }
-.dot-g { background: #28c840; }
-.terminal-title {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--text3);
-  letter-spacing: 0.1em;
-}
-.terminal-body { padding: 24px; }
-.t-line { display: flex; gap: 12px; }
-.t-prompt { color: var(--gold); }
-.t-cmd { color: var(--cyan); }
-.t-out { color: var(--text3); padding-left: 16px; }
-.t-ok { color: var(--green); }
-.t-warn { color: #ffa502; }
-.t-err { color: var(--red); }
-.t-blank { height: 12px; }
-
-/* ── Roles section ── */
-.roles-section { background: var(--bg); }
-
-.roles-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-  margin-top: 72px;
-}
-
-.role-card {
-  background: var(--bg2);
-  padding: 36px 28px;
-}
-
-.role-badge {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  margin-bottom: 20px;
-  display: inline-block;
-}
-.badge-gold   { color: var(--gold);  border: 1px solid var(--gold-dim);  background: var(--gold-glow); }
-.badge-cyan   { color: var(--cyan);  border: 1px solid rgba(0,212,255,0.2); background: var(--cyan-dim); }
-.badge-green  { color: var(--green); border: 1px solid rgba(46,213,115,0.2); background: rgba(46,213,115,0.06); }
-.badge-muted  { color: var(--text3); border: 1px solid var(--border2); background: transparent; }
-
-.role-name {
-  font-family: var(--display);
-  font-size: 28px;
-  letter-spacing: 0.04em;
-  color: var(--text);
-  margin-bottom: 14px;
-}
-
-.role-desc {
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--text2);
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-.role-perms { list-style: none; }
-.role-perms li {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text3);
-  padding: 6px 0;
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.role-perms li::before {
-  content: '→';
-  color: var(--gold);
-  font-size: 10px;
-}
-
-/* ── Workflow section ── */
-.workflow-section {
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-}
-
-.workflow-cards {
-  display: flex;
-  gap: 1px;
-  background: var(--border);
-  margin-top: 72px;
-}
-
-.workflow-card {
-  flex: 1;
-  background: var(--bg3);
-  padding: 36px 28px;
-  position: relative;
-}
-
-.wf-num {
-  font-family: var(--display);
-  font-size: 80px;
-  color: var(--bg2);
-  position: absolute;
-  top: 16px; right: 20px;
-  line-height: 1;
-  user-select: none;
-}
-
-.wf-icon {
-  font-size: 24px;
-  margin-bottom: 16px;
-  display: block;
-}
-
-.wf-title {
-  font-family: var(--display);
-  font-size: 22px;
-  letter-spacing: 0.04em;
-  color: var(--text);
-  margin-bottom: 10px;
-}
-
-.wf-desc {
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--text2);
-  line-height: 1.6;
-}
-
-/* ── CTA section ── */
-.cta-section {
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.cta-section::before {
-  content: '';
-  position: absolute;
-  bottom: -200px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 500px;
-  background: radial-gradient(ellipse, rgba(201,168,76,0.05) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.cta-eyebrow {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--text3);
-  margin-bottom: 28px;
-}
-
-.cta-title {
-  font-family: var(--display);
-  font-size: clamp(56px, 8vw, 100px);
-  line-height: 0.93;
-  letter-spacing: 0.03em;
-  margin-bottom: 32px;
-}
-.cta-title .gold { color: var(--gold); }
-
-.cta-desc {
-  font-size: 17px;
-  font-weight: 300;
-  color: var(--text2);
-  max-width: 500px;
-  margin: 0 auto 48px;
-  line-height: 1.7;
-}
-
-/* ── Footer ── */
-footer {
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  padding: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.footer-logo {
-  font-family: var(--display);
-  font-size: 24px;
-  letter-spacing: 0.08em;
-  color: var(--gold);
-}
-
-.footer-links {
-  display: flex;
-  gap: 32px;
-}
-.footer-links a {
-  font-size: 12px;
-  font-family: var(--mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text3);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.footer-links a:hover { color: var(--gold); }
-
-.footer-copy {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text3);
-}
-
-/* ── Utility ── */
-.container { max-width: 1280px; margin: 0 auto; }
-
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  align-items: start;
-}
-
-/* ── Scroll animations ── */
-.reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-.reveal-delay-4 { transition-delay: 0.4s; }
-.reveal-delay-5 { transition-delay: 0.5s; }
-
-/* ── Ticker ── */
-.ticker-wrap {
-  background: var(--gold);
-  color: #080a0c;
-  padding: 10px 0;
-  overflow: hidden;
-  white-space: nowrap;
-}
-.ticker {
-  display: inline-flex;
-  gap: 0;
-  animation: ticker 30s linear infinite;
-}
-@keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.ticker-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 32px;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-.ticker-item::after { content: '◆'; font-size: 8px; opacity: 0.5; }
-
-/* ── Responsive ── */
-@media (max-width: 900px) {
-  nav { padding: 0 24px; }
-  .nav-links { display: none; }
-  section { padding: 72px 24px; }
-  .features-grid { grid-template-columns: 1fr; }
-  .roles-grid { grid-template-columns: 1fr 1fr; }
-  .stats-bar { grid-template-columns: repeat(2, 1fr); padding: 0; }
-  .how-grid { grid-template-columns: 1fr; }
-  .workflow-cards { flex-direction: column; }
-  .two-col { grid-template-columns: 1fr; gap: 48px; }
-  footer { flex-direction: column; text-align: center; }
-  .footer-links { flex-wrap: wrap; justify-content: center; }
-}
-@media (max-width: 600px) {
-  .roles-grid { grid-template-columns: 1fr; }
-  .hero { padding: 100px 24px 60px; }
+  --bg:#080a0c; --bg2:#0d1117; --bg3:#111820; --bg4:#0a0f14;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --gold:#c9a84c; --gold2:#e8c97a; --gold-dim:rgba(201,168,76,0.18); --gold-glow:rgba(201,168,76,0.07);
+  --cyan:#00d4ff; --cyan-dim:rgba(0,212,255,0.1);
+  --red:#ff4757; --green:#2ed573; --amber:#ffa502;
+  --text:#e8edf2; --text2:#8fa3b4; --text3:#4a606f;
+  --mono:'DM Mono',monospace; --sans:'DM Sans',sans-serif; --display:'Bebas Neue',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:0.022;pointer-events:none;z-index:9999}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:0 48px;height:62px;display:flex;align-items:center;justify-content:space-between;background:rgba(8,10,12,0.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--display);font-size:27px;letter-spacing:.08em;color:var(--gold);text-decoration:none;display:flex;align-items:center;gap:10px}
+.nav-logo-v{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text3);border:1px solid var(--border2);padding:2px 7px}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:12px;font-weight:500;color:var(--text2);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s}
+.nav-links a:hover{color:var(--gold)}
+.nav-cta{background:var(--gold);color:#080a0c;padding:8px 22px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:background .2s,transform .1s}
+.nav-cta:hover{background:var(--gold2);transform:translateY(-1px)}
+
+/* BUTTONS */
+.btn-p{background:var(--gold);color:#080a0c;padding:13px 30px;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:background .2s,transform .15s;border:none;cursor:pointer}
+.btn-p:hover{background:var(--gold2);transform:translateY(-2px)}
+.btn-g{background:transparent;color:var(--text2);padding:13px 30px;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border:1px solid var(--border2);display:inline-flex;align-items:center;gap:8px;transition:color .2s,border-color .2s,transform .15s}
+.btn-g:hover{color:var(--gold);border-color:var(--gold-dim);transform:translateY(-2px)}
+.btn-og{background:transparent;color:var(--gold);padding:13px 30px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;border:1px solid var(--gold-dim);display:inline-flex;align-items:center;gap:8px;transition:background .2s,transform .15s}
+.btn-og:hover{background:var(--gold-dim);transform:translateY(-2px)}
+
+/* HERO */
+.hero{min-height:100vh;padding:130px 48px 0;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.035) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 70% at 50% 40%,black 10%,transparent 75%)}
+.hero-glow{position:absolute;top:10%;left:50%;transform:translateX(-50%);width:700px;height:480px;background:radial-gradient(ellipse,rgba(201,168,76,.055) 0%,transparent 68%);pointer-events:none}
+.hero-inner{position:relative;z-index:1;text-align:center;max-width:1000px}
+.hero-badge{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:6px 18px;margin-bottom:44px;background:var(--gold-glow)}
+.pulse{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pa 2.2s ease-in-out infinite}
+@keyframes pa{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.75)}}
+.hero-title{font-family:var(--display);font-size:clamp(68px,9.5vw,134px);line-height:.9;letter-spacing:.025em;margin-bottom:10px}
+.hero-title .gold{color:var(--gold)} .hero-title .dim{color:var(--text3)}
+.hero-sub{font-family:var(--display);font-size:clamp(17px,2.4vw,30px);letter-spacing:.13em;color:var(--text3);margin-bottom:36px}
+.hero-desc{font-size:17px;font-weight:300;color:var(--text2);line-height:1.75;max-width:580px;margin:0 auto 20px}
+.hero-cta-block{display:flex;flex-direction:column;align-items:center;gap:14px}
+.hero-cta-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.cta-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3)}
+.cta-note{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3);margin-top:4px}
+
+/* MOCKUP */
+.hero-mockup{position:relative;z-index:1;width:100%;max-width:1040px;margin:52px auto 0}
+.mock-win{background:var(--bg2);border:1px solid var(--border2);border-bottom:none;overflow:hidden;box-shadow:0 -20px 80px rgba(201,168,76,.06),0 0 0 1px rgba(201,168,76,.05)}
+.mock-bar{background:var(--bg3);padding:10px 16px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.dot{width:10px;height:10px;border-radius:50%} .dot-r{background:#ff5f57} .dot-y{background:#febc2e} .dot-g{background:#28c840}
+.mock-url{margin-left:12px;font-family:var(--mono);font-size:11px;color:var(--text3);background:var(--bg4);padding:3px 12px;border:1px solid var(--border);flex:1;max-width:280px;text-align:center}
+.mock-body{display:grid;grid-template-columns:210px 1fr;min-height:400px}
+.mock-side{background:var(--bg4);border-right:1px solid var(--border);padding:16px 0}
+.side-logo{font-family:var(--display);font-size:19px;letter-spacing:.08em;color:var(--gold);padding:0 16px 14px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.side-item{padding:8px 16px;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:var(--text3);display:flex;align-items:center;gap:10px}
+.side-item.act{background:var(--gold-glow);color:var(--gold);border-left:2px solid var(--gold)}
+.side-sec{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);padding:12px 16px 4px;opacity:.5}
+.mock-main{padding:18px 22px;overflow:hidden}
+.mock-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mock-ttl{font-family:var(--display);font-size:21px;letter-spacing:.04em;color:var(--text)}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:2px;letter-spacing:.08em}
+.b-red{background:rgba(255,71,87,.15);color:var(--red);border:1px solid rgba(255,71,87,.25)}
+.b-amb{background:rgba(255,165,2,.12);color:var(--amber);border:1px solid rgba(255,165,2,.25)}
+.b-grn{background:rgba(46,213,115,.1);color:var(--green);border:1px solid rgba(46,213,115,.2)}
+.b-cyn{background:rgba(0,212,255,.08);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
+.kpi-box{background:var(--bg3);border:1px solid var(--border);padding:9px 11px}
+.kpi-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:3px}
+.kpi-v{font-family:var(--display);font-size:22px;letter-spacing:.03em;line-height:1}
+.kpi-s{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:2px}
+.tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px}
+.tbl th{text-align:left;padding:6px 9px;background:var(--bg3);border-bottom:1px solid var(--border);color:var(--text3);font-weight:400;letter-spacing:.08em;text-transform:uppercase;font-size:9px}
+.tbl td{padding:7px 9px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+.tbl tr:hover td{background:var(--bg3)}
+.fp{color:var(--cyan);font-size:10px}
+.sql-cell{color:var(--text3);font-size:10px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rpill{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:2px}
+.spark{display:inline-flex;align-items:flex-end;gap:1.5px;height:18px}
+.sb{width:4px;background:var(--text3);border-radius:1px} .sb-hi{background:var(--red)} .sb-med{background:var(--amber)}
+
+/* TICKER */
+.ticker-wrap{background:var(--gold);overflow:hidden;white-space:nowrap;padding:9px 0}
+.ticker{display:inline-flex;animation:tick 36s linear infinite}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ti{display:inline-flex;align-items:center;gap:12px;padding:0 26px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:#080a0c}
+.ti::after{content:'◆';font-size:7px;opacity:.4}
+
+/* STATS */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);background:var(--border);gap:1px}
+.stat-box{background:var(--bg2);padding:30px 26px;text-align:center}
+.snum{font-family:var(--display);font-size:52px;letter-spacing:.04em;color:var(--gold);line-height:1;margin-bottom:5px}
+.slbl{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text3)}
+.ssrc{font-family:var(--mono);font-size:9px;color:var(--text3);opacity:.45;margin-top:3px}
+
+/* SECTIONS */
+section{padding:96px 48px}
+.container{max-width:1280px;margin:0 auto}
+.stag{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.stag::before{content:'//';color:var(--text3)}
+.stitle{font-family:var(--display);font-size:clamp(44px,5.5vw,76px);line-height:.93;letter-spacing:.025em;margin-bottom:22px}
+.sdesc{font-size:16px;font-weight:300;color:var(--text2);line-height:1.75;max-width:540px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+
+/* INCIDENT BUNDLE */
+.inc-sec{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.inc-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.file-win{background:var(--bg3);border:1px solid var(--border2);overflow:hidden}
+.file-bar{background:var(--bg4);padding:9px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;gap:8px;align-items:center}
+.frow{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text2);transition:background .2s}
+.frow:hover{background:var(--bg4)}
+.ficon{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.fname{color:var(--gold);flex:1}
+.fdesc{font-size:9px;color:var(--text3)}
+.fsize{font-size:9px;color:var(--text3);flex-shrink:0}
+
+/* FEATURES */
+.feat-sec{background:var(--bg)}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:68px}
+.feat-card{background:var(--bg2);padding:36px 30px;position:relative;overflow:hidden;transition:background .3s}
+.feat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
+.feat-card:hover{background:var(--bg3)} .feat-card:hover::after{transform:scaleX(1)}
+.fsrc{font-family:var(--mono);font-size:10px;letter-spacing:.07em;color:var(--text3);margin-bottom:14px;display:block}
+.ftitle{font-family:var(--display);font-size:23px;letter-spacing:.04em;margin-bottom:11px}
+.fdesc2{font-size:13px;font-weight:300;color:var(--text2);line-height:1.7;margin-bottom:16px}
+.ftag{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);padding:3px 9px;background:var(--gold-glow)}
+
+/* COMPAT */
+.compat-sec{background:var(--bg2);border-top:1px solid var(--border)}
+.vstrip{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.vpill{font-family:var(--mono);font-size:11px;letter-spacing:.07em;border:1px solid var(--border2);padding:6px 13px;color:var(--text2);background:var(--bg3);transition:border-color .2s,color .2s}
+.vpill.sup{border-color:var(--gold-dim);color:var(--gold);background:var(--gold-glow)}
+.cdetail{margin-top:26px}
+.crow{display:flex;align-items:flex-start;gap:13px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px}
+.crow:last-child{border-bottom:none}
+.cicon{font-size:14px;flex-shrink:0;margin-top:2px}
+.ctxt strong{color:var(--text);display:block;margin-bottom:2px;font-weight:500}
+.ctxt span{color:var(--text2);font-weight:300;font-size:13px}
+
+/* WHO FOR */
+.for-sec{background:var(--bg);border-top:1px solid var(--border)}
+.for-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);margin-top:68px}
+.for-card{background:var(--bg2);padding:38px 34px}
+.for-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:18px;padding:4px 10px;display:inline-block}
+.for-yes .for-lbl{color:var(--green);border:1px solid rgba(46,213,115,.2);background:rgba(46,213,115,.06)}
+.for-no  .for-lbl{color:var(--text3);border:1px solid var(--border2)}
+.for-ttl{font-family:var(--display);font-size:26px;letter-spacing:.04em;margin-bottom:18px}
+.for-list{list-style:none}
+.for-list li{font-size:13px;font-weight:300;color:var(--text2);padding:8px 0;border-top:1px solid var(--border);display:flex;align-items:flex-start;gap:10px}
+.for-list li::before{flex-shrink:0;margin-top:1px}
+.for-yes .for-list li::before{content:'✓';color:var(--green);font-family:var(--mono);font-size:10px}
+.for-no  .for-list li::before{content:'✕';color:var(--text3);font-family:var(--mono);font-size:10px}
+
+/* HOW IT WORKS */
+.how-sec{background:var(--bg2);border-top:1px solid var(--border)}
+.how-steps{display:flex;flex-direction:column;gap:0;margin-top:40px}
+.how-step{display:flex;gap:22px;padding:24px 0;border-bottom:1px solid var(--border)}
+.how-step:last-child{border-bottom:none}
+.sn{font-family:var(--display);font-size:48px;color:var(--border2);line-height:1;flex-shrink:0;width:44px;transition:color .3s}
+.how-step:hover .sn{color:var(--gold)}
+.sttl{font-family:var(--display);font-size:18px;letter-spacing:.05em;margin-bottom:5px}
+.sdsc{font-size:13px;font-weight:300;color:var(--text2);line-height:1.65}
+
+/* TERMINAL */
+.term{background:#050709;border:1px solid var(--border2);font-family:var(--mono);font-size:12px;line-height:1.85}
+.term-bar{background:var(--bg3);padding:9px 14px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border)}
+.term-ttl{margin-left:auto;font-size:10px;color:var(--text3);letter-spacing:.09em}
+.term-body{padding:18px 20px}
+.tl{display:flex;gap:9px;min-height:20px}
+.tp{color:var(--gold);flex-shrink:0} .tc{color:var(--cyan)} .to{color:var(--text3);padding-left:12px}
+.tok{color:var(--green)} .tw{color:var(--amber)} .te{color:var(--red)} .tb{height:10px}
+
+/* ROLES */
+.roles-sec{background:var(--bg);border-top:1px solid var(--border)}
+.roles-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-top:68px}
+.role-card{background:var(--bg2);padding:32px 24px}
+.rbadge{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;padding:3px 9px;margin-bottom:16px;display:inline-block}
+.bg{color:var(--gold);border:1px solid var(--gold-dim);background:var(--gold-glow)}
+.bc{color:var(--cyan);border:1px solid rgba(0,212,255,.2);background:var(--cyan-dim)}
+.bge{color:var(--green);border:1px solid rgba(46,213,115,.2);background:rgba(46,213,115,.06)}
+.bm{color:var(--text3);border:1px solid var(--border2)}
+.rname{font-family:var(--display);font-size:25px;letter-spacing:.04em;margin-bottom:10px}
+.rdesc{font-size:12px;font-weight:300;color:var(--text2);line-height:1.65;margin-bottom:16px}
+.rperms{list-style:none}
+.rperms li{font-family:var(--mono);font-size:10px;color:var(--text3);padding:5px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:7px}
+.rperms li::before{content:'→';color:var(--gold);font-size:9px}
+
+/* WORKFLOW */
+.wf-sec{background:var(--bg2);border-top:1px solid var(--border)}
+.wf-cards{display:flex;gap:1px;background:var(--border);margin-top:68px}
+.wf-card{flex:1;background:var(--bg3);padding:30px 24px;position:relative}
+.wfn{font-family:var(--display);font-size:70px;color:rgba(255,255,255,.03);position:absolute;top:12px;right:14px;line-height:1;user-select:none}
+.wf-icon{font-size:20px;margin-bottom:12px;display:block}
+.wf-ttl{font-family:var(--display);font-size:19px;letter-spacing:.04em;margin-bottom:8px}
+.wf-dsc{font-size:12px;font-weight:300;color:var(--text2);line-height:1.65}
+
+/* PRICING */
+.price-sec{background:var(--bg);border-top:1px solid var(--border)}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:68px}
+.pcard{background:var(--bg2);padding:38px 34px}
+.pcard.feat{background:var(--bg3);border-top:2px solid var(--gold)}
+.ptier{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+.ptier.pop{color:var(--gold)}
+.pval{font-family:var(--display);font-size:50px;color:var(--text);line-height:1}
+.pval.gold{color:var(--gold)}
+.pper{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:22px}
+.pdesc{font-size:13px;font-weight:300;color:var(--text2);line-height:1.7;margin-bottom:26px}
+.pfeats{list-style:none;margin-bottom:30px}
+.pfeats li{font-size:12px;color:var(--text2);padding:6px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;font-family:var(--mono)}
+.pfeats li::before{content:'✓';color:var(--green);font-size:10px;flex-shrink:0}
+
+/* TRUST */
+.trust-bar{background:var(--border);display:flex;gap:1px}
+.trust-item{background:var(--bg2);flex:1;padding:22px 26px;display:flex;align-items:flex-start;gap:12px}
+.t-icon{font-size:17px;flex-shrink:0;margin-top:2px}
+.t-ttl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.t-txt{font-size:12px;font-weight:300;color:var(--text2);line-height:1.5}
+
+/* CTA */
+.cta-sec{background:var(--bg);border-top:1px solid var(--border);text-align:center;position:relative;overflow:hidden;padding:100px 48px 120px}
+.cta-glow{position:absolute;bottom:-200px;left:50%;transform:translateX(-50%);width:900px;height:560px;background:radial-gradient(ellipse,rgba(201,168,76,.045) 0%,transparent 65%);pointer-events:none}
+.cta-ey{font-family:var(--mono);font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--text3);margin-bottom:24px}
+.cta-ttl{font-family:var(--display);font-size:clamp(52px,7.5vw,96px);line-height:.92;letter-spacing:.025em;margin-bottom:28px}
+.cta-ttl .gold{color:var(--gold)}
+.cta-dsc{font-size:16px;font-weight:300;color:var(--text2);max-width:480px;margin:0 auto 40px;line-height:1.75}
+.cta-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);max-width:820px;margin:0 auto}
+.cta-opt{background:var(--bg2);padding:26px 22px;text-align:left;position:relative}
+.cta-opt.primary{background:var(--bg3);border-top:2px solid var(--gold)}
+.co-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.cta-opt.primary .co-lbl{color:var(--gold)}
+.co-ttl{font-family:var(--display);font-size:19px;letter-spacing:.04em;margin-bottom:8px}
+.co-dsc{font-size:12px;font-weight:300;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.cta-opt a{font-size:11px;padding:9px 16px}
+
+/* FOOTER */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:42px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.f-logo{font-family:var(--display);font-size:21px;letter-spacing:.08em;color:var(--gold)}
+.f-links{display:flex;gap:26px;flex-wrap:wrap}
+.f-links a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;transition:color .2s}
+.f-links a:hover{color:var(--gold)}
+.f-copy{font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.08s} .d2{transition-delay:.16s} .d3{transition-delay:.24s}
+.d4{transition-delay:.32s} .d5{transition-delay:.4s}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+  nav{padding:0 24px} .nav-links{display:none}
+  section{padding:72px 24px}
+  .feat-grid{grid-template-columns:1fr}
+  .roles-grid{grid-template-columns:1fr 1fr}
+  .stats-bar{grid-template-columns:1fr 1fr}
+  .two-col,.compat-sec .two-col,.inc-grid,.for-grid{grid-template-columns:1fr;gap:48px}
+  .mock-body{grid-template-columns:180px 1fr}
+  .wf-cards{flex-direction:column}
+  .price-grid{grid-template-columns:1fr}
+  .cta-opts{grid-template-columns:1fr}
+  .trust-bar{flex-direction:column}
+  footer{flex-direction:column;text-align:center}
+  .f-links{justify-content:center}
+}
+@media(max-width:600px){
+  .roles-grid,.for-grid{grid-template-columns:1fr}
+  .hero{padding:110px 24px 0}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .mock-body{grid-template-columns:1fr}
+  .mock-side{display:none}
 }
 </style>
 </head>
 <body>
 
-<!-- ── Navigation ── -->
 <nav>
-  <a href="#" class="nav-logo">ORODB<span>v1.0</span></a>
+  <a href="#" class="nav-logo">ORODB<span class="nav-logo-v">v1.0</span></a>
   <div class="nav-links">
     <a href="#features">Features</a>
+    <a href="#for-who">Who It's For</a>
     <a href="#workflow">Workflow</a>
-    <a href="#roles">Roles</a>
     <a href="#pricing">Pricing</a>
-    <a href="https://test.orodb.com" target="_blank" class="nav-cta">Try Demo →</a>
+    <a href="https://test.orodb.com" target="_blank" class="nav-cta">Open App →</a>
   </div>
 </nav>
 
-<!-- ── Hero ── -->
+<!-- HERO -->
 <section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
   <div class="hero-inner">
-    <div class="hero-badge">SQL Server Intelligence Platform</div>
-    <h1 class="hero-title display">
-      <span class="dim">STOP</span><br>
-      <span class="gold">GUESSING.</span><br>
-      START KNOWING.
-    </h1>
-    <p class="hero-sub">Real-time performance intelligence for SQL Server</p>
-    <p class="hero-desc">
-      OroDb captures, fingerprints, and correlates every wait, query, and execution plan across your SQL Server estate — so you find performance problems in minutes, not days.
-    </p>
-    <div class="hero-actions">
-      <a href="https://test.orodb.com" class="btn-primary">Get Early Access ↗</a>
-      <a href="#features" class="btn-ghost">See Features</a>
+    <div class="hero-badge"><div class="pulse"></div>SQL Server Performance Investigation</div>
+    <h1 class="hero-title"><span class="dim">NOT JUST</span><br><span class="gold">MONITORING.</span><br>INVESTIGATION.</h1>
+    <p class="hero-sub">Query fingerprinting · Regression detection · Incident bundles</p>
+    <p class="hero-desc">OroDb captures wait stats, fingerprints every query, detects regressions against a rolling baseline, and packages everything into a single incident ZIP — so you spend less time gathering data and more time fixing the problem.</p>
+    <div class="hero-cta-block">
+      <div class="cta-lbl">Choose how you want to start</div>
+      <div class="hero-cta-row">
+        <a href="https://test.orodb.com/auth/register" class="btn-p">Start Free — 1 Server ↗</a>
+        <a href="https://test.orodb.com" class="btn-og">Try Live Demo</a>
+        <a href="mailto:hello@orodb.com" class="btn-g">Talk to a DBA</a>
+      </div>
+      <p class="cta-note">No credit card &nbsp;·&nbsp; No agents &nbsp;·&nbsp; No schema changes on monitored databases</p>
+    </div>
+  </div>
+
+  <!-- UI MOCKUP -->
+  <div class="hero-mockup">
+    <div class="mock-win">
+      <div class="mock-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <div class="mock-url">test.orodb.com/trends</div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-side">
+          <div class="side-logo">ORODB</div>
+          <div class="side-item act">&#x2295; &nbsp;Query Trends</div>
+          <div class="side-item">&#x229E; &nbsp;Dashboard</div>
+          <div class="side-item">&#x2299; &nbsp;Query Analysis</div>
+          <div class="side-item">&#x25E7; &nbsp;Reports</div>
+          <div class="side-sec">Workflow</div>
+          <div class="side-item">&#x2713; &nbsp;Index Workflow</div>
+          <div class="side-item">&#x23F1; &nbsp;Timeline</div>
+          <div class="side-sec">Admin</div>
+          <div class="side-item">&#x2298; &nbsp;Alert Rules</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-hdr">
+            <span class="mock-ttl">Query Trends</span>
+            <span class="badge b-red">2 Regressions</span>
+          </div>
+          <div class="kpi-row">
+            <div class="kpi-box"><div class="kpi-lbl">Fingerprints</div><div class="kpi-v" style="color:var(--cyan)">47</div><div class="kpi-s">tracked queries</div></div>
+            <div class="kpi-box"><div class="kpi-lbl">Regressions</div><div class="kpi-v" style="color:var(--red)">2</div><div class="kpi-s">vs 7-day baseline</div></div>
+            <div class="kpi-box"><div class="kpi-lbl">CPU Elevated</div><div class="kpi-v" style="color:var(--amber)">5</div><div class="kpi-s">&gt;50% above baseline</div></div>
+            <div class="kpi-box"><div class="kpi-lbl">Stable</div><div class="kpi-v" style="color:var(--green)">40</div><div class="kpi-s">within baseline</div></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Fingerprint</th><th>Normalized SQL</th><th>Status</th><th>CPU last</th><th>Baseline</th><th>Trend</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="fp">a3f2c1b8</td>
+                <td class="sql-cell">SELECT ... FROM Orders WHERE CustomerId = @P</td>
+                <td><span class="rpill b-red">&#x26A0; +67% CpuMs</span></td>
+                <td style="color:var(--red)">207 ms</td><td style="color:var(--text3)">124 ms</td>
+                <td><div class="spark"><div class="sb" style="height:40%"></div><div class="sb" style="height:45%"></div><div class="sb" style="height:50%"></div><div class="sb sb-med" style="height:65%"></div><div class="sb sb-hi" style="height:100%"></div></div></td>
+              </tr>
+              <tr>
+                <td class="fp">7c9d4e21</td>
+                <td class="sql-cell">UPDATE Inventory SET Qty = @P WHERE SKU = @P</td>
+                <td><span class="rpill b-amb">&#x26A0; +31% Reads</span></td>
+                <td style="color:var(--amber)">89 ms</td><td style="color:var(--text3)">68 ms</td>
+                <td><div class="spark"><div class="sb" style="height:50%"></div><div class="sb" style="height:48%"></div><div class="sb" style="height:55%"></div><div class="sb sb-med" style="height:80%"></div><div class="sb sb-med" style="height:90%"></div></div></td>
+              </tr>
+              <tr>
+                <td class="fp">f1a8b3c9</td>
+                <td class="sql-cell">SELECT TOP @P ... FROM Products JOIN Category</td>
+                <td><span class="rpill b-grn">Stable</span></td>
+                <td style="color:var(--text2)">12 ms</td><td style="color:var(--text3)">14 ms</td>
+                <td><div class="spark"><div class="sb" style="height:60%"></div><div class="sb" style="height:55%"></div><div class="sb" style="height:58%"></div><div class="sb" style="height:60%"></div><div class="sb" style="height:57%"></div></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ── Ticker ── -->
+<!-- TICKER -->
 <div class="ticker-wrap" aria-hidden="true">
   <div class="ticker">
-    <span class="ticker-item">Query Fingerprinting</span>
-    <span class="ticker-item">Regression Detection</span>
-    <span class="ticker-item">Incident Bundles</span>
-    <span class="ticker-item">Wait Stats Analysis</span>
-    <span class="ticker-item">Index Recommendations</span>
-    <span class="ticker-item">Plan Change Detection</span>
-    <span class="ticker-item">Configurable Alerts</span>
-    <span class="ticker-item">Approval Workflow</span>
-    <span class="ticker-item">Timeline Correlation</span>
-    <span class="ticker-item">Role-Based Views</span>
-    <span class="ticker-item">Query Fingerprinting</span>
-    <span class="ticker-item">Regression Detection</span>
-    <span class="ticker-item">Incident Bundles</span>
-    <span class="ticker-item">Wait Stats Analysis</span>
-    <span class="ticker-item">Index Recommendations</span>
-    <span class="ticker-item">Plan Change Detection</span>
-    <span class="ticker-item">Configurable Alerts</span>
-    <span class="ticker-item">Approval Workflow</span>
-    <span class="ticker-item">Timeline Correlation</span>
-    <span class="ticker-item">Role-Based Views</span>
+    <span class="ti">Query Fingerprinting</span><span class="ti">Plan Regression Detection</span><span class="ti">Wait Stats Analysis</span><span class="ti">Incident Bundle Export</span><span class="ti">Index Rec Workflow</span><span class="ti">Configurable Alert Rules</span><span class="ti">Baseline Trending</span><span class="ti">Timeline Correlation</span><span class="ti">Role-Based Views</span><span class="ti">AES-256 Encryption</span><span class="ti">Azure Key Vault</span><span class="ti">No Agent Required</span>
+    <span class="ti">Query Fingerprinting</span><span class="ti">Plan Regression Detection</span><span class="ti">Wait Stats Analysis</span><span class="ti">Incident Bundle Export</span><span class="ti">Index Rec Workflow</span><span class="ti">Configurable Alert Rules</span><span class="ti">Baseline Trending</span><span class="ti">Timeline Correlation</span><span class="ti">Role-Based Views</span><span class="ti">AES-256 Encryption</span><span class="ti">Azure Key Vault</span><span class="ti">No Agent Required</span>
   </div>
 </div>
 
-<!-- ── Stats ── -->
-<div class="stats-bar" id="stats">
-  <div class="stat-item reveal">
-    <div class="stat-num" data-target="20">0</div>
-    <div class="stat-label">Tables monitored per server</div>
-  </div>
-  <div class="stat-item reveal reveal-delay-1">
-    <div class="stat-num" data-target="90">0</div>
-    <div class="stat-label">Trend data points per query</div>
-  </div>
-  <div class="stat-item reveal reveal-delay-2">
-    <div class="stat-num" data-target="4">0</div>
-    <div class="stat-label">Security roles built-in</div>
-  </div>
-  <div class="stat-item reveal reveal-delay-3">
-    <div class="stat-num" data-suffix="ms">0</div>
-    <div class="stat-label">Live wait stats refresh</div>
-  </div>
+<!-- STATS — real numbers only -->
+<div class="stats-bar">
+  <div class="stat-box reveal"><div class="snum">2014</div><div class="slbl">Earliest SQL Server supported</div><div class="ssrc">2014 · 2016 · 2017 · 2019 · 2022</div></div>
+  <div class="stat-box reveal d1"><div class="snum">14</div><div class="slbl">Data points per trend baseline</div><div class="ssrc">rolling 7-day · auto-calibrating</div></div>
+  <div class="stat-box reveal d2"><div class="snum">90</div><div class="slbl">Max trend history per query</div><div class="ssrc">chart data points · stored indefinitely</div></div>
+  <div class="stat-box reveal d3"><div class="snum">4</div><div class="slbl">Security roles with distinct views</div><div class="ssrc">SuperAdmin · TenantAdmin · DbaAnalyst · ReadOnly</div></div>
 </div>
 
-<!-- ── Features ── -->
-<section class="features-section" id="features">
+<!-- INCIDENT BUNDLE SPOTLIGHT -->
+<section class="inc-sec" id="incident">
   <div class="container">
-    <div class="section-tag">Core Capabilities</div>
-    <h2 class="section-title display reveal">EVERY TOOL<br>A DBA NEEDS</h2>
-    <p class="section-desc reveal reveal-delay-1">From raw wait stats to plain-English business impact — OroDb connects all the signals in one place.</p>
-
-    <div class="features-grid">
-
-      <div class="feature-card reveal">
-        <span class="feature-icon mono">sys.dm_exec_query_stats</span>
-        <h3 class="feature-title display">QUERY FINGERPRINTING</h3>
-        <p class="feature-desc">Normalizes parameterized SQL into stable identities. Two queries doing the same logical work share one fingerprint regardless of literal values — enabling true trend tracking over time.</p>
-        <span class="feature-tag">Regression Detection</span>
+    <div class="inc-grid">
+      <div>
+        <div class="stag reveal">The feature that saves the most time</div>
+        <h2 class="stitle reveal">ONE CLICK.<br>EVERYTHING<br><span style="color:var(--gold)">THEY NEED.</span></h2>
+        <p class="sdesc reveal d1">When things are on fire, you don't have time to manually pull wait stats, plan XMLs, alert history, and server config from six different places. OroDb packages all of it into a single ZIP — vendor-escalation-ready in seconds.</p>
+        <p style="font-size:14px;font-weight:300;color:var(--text3);line-height:1.7;max-width:460px;margin-top:18px;font-style:italic" class="reveal d2">"The incident bundle is the feature that saves us the most time. What used to take 45 minutes to assemble for a support ticket is now one button."</p>
+        <div style="margin-top:30px" class="reveal d3"><a href="https://test.orodb.com" class="btn-p" style="font-size:12px">See a Sample Bundle ↗</a></div>
       </div>
-
-      <div class="feature-card reveal reveal-delay-1">
-        <span class="feature-icon mono">sys.dm_os_wait_stats</span>
-        <h3 class="feature-title display">WAIT STATS ENGINE</h3>
-        <p class="feature-desc">Real-time and snapshot-based wait type analysis. Categorised into CPU, IO, Memory, Lock, and Other. Signal-vs-resource breakdown instantly tells you whether you have CPU pressure or data pressure.</p>
-        <span class="feature-tag">Live Dashboard</span>
+      <div class="reveal d1">
+        <div class="file-win">
+          <div class="file-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span style="margin-left:8px">incident_bundle_prod-sql-01_20260322.zip</span></div>
+          <div class="frow"><span class="ficon">&#x1F4C4;</span><span class="fname">README.txt</span><span class="fdesc">Manifest + support instructions</span><span class="fsize">2kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F4DD;</span><span class="fname">00_SUMMARY.txt</span><span class="fdesc">Plain-English narrative — for non-DBAs</span><span class="fsize">4kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F4CA;</span><span class="fname">01_wait_stats.csv</span><span class="fdesc">Top 30 wait types, all metrics</span><span class="fsize">8kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F4CA;</span><span class="fname">02_active_waits.csv</span><span class="fdesc">Sessions waiting at capture time</span><span class="fsize">3kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F4DD;</span><span class="fname">03_top_queries.txt</span><span class="fdesc">Top 20 queries by resource usage</span><span class="fsize">12kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F310;</span><span class="fname">04_plans/query_01.html</span><span class="fdesc">Execution plan — open in browser</span><span class="fsize">84kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F310;</span><span class="fname">04_plans/query_02.html</span><span class="fdesc">Execution plan — open in browser</span><span class="fsize">71kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F527;</span><span class="fname">05_index_recommendations.sql</span><span class="fdesc">CREATE INDEX — review before running</span><span class="fsize">6kb</span></div>
+          <div class="frow"><span class="ficon">&#x26A0;&#xFE0F;</span><span class="fname">06_alert_history.csv</span><span class="fdesc">Recent alerts for this server</span><span class="fsize">2kb</span></div>
+          <div class="frow"><span class="ficon">&#x2699;&#xFE0F;</span><span class="fname">07_server_config.txt</span><span class="fdesc">sys.configurations snapshot</span><span class="fsize">2kb</span></div>
+          <div class="frow"><span class="ficon">&#x1F4C9;</span><span class="fname">08_regressions.txt</span><span class="fdesc">Queries above baseline + details</span><span class="fsize">3kb</span></div>
+        </div>
       </div>
-
-      <div class="feature-card reveal reveal-delay-2">
-        <span class="feature-icon mono">sys.dm_exec_query_plan</span>
-        <h3 class="feature-title display">PLAN REGRESSION DETECTION</h3>
-        <p class="feature-desc">Hashes the structural shape of execution plans across snapshots. When a query's plan changes and performance drops simultaneously, OroDb flags it immediately — with the old and new plan side by side.</p>
-        <span class="feature-tag">Plan Shape Hash</span>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-3">
-        <span class="feature-icon mono">sys.dm_db_missing_index_details</span>
-        <h3 class="feature-title display">INDEX RECOMMENDATIONS</h3>
-        <p class="feature-desc">Classified as HighConfidence, ReviewRequired, ConflictingDuplicate, or WriteHeavyRisk — not just a raw DMV dump. Approval workflow tracks status through Pending → Approved → Applied with full audit trail.</p>
-        <span class="feature-tag">Workflow + Classification</span>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-4">
-        <span class="feature-icon mono">./incident_bundle.zip</span>
-        <h3 class="feature-title display">INCIDENT BUNDLES</h3>
-        <p class="feature-desc">One click generates a complete ZIP: wait stats CSV, top queries TXT, execution plan HTML viewers, index recommendation scripts, alert history, sys.configurations snapshot, and a plain-English narrative summary ready for vendor escalation.</p>
-        <span class="feature-tag">Export Ready</span>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-5">
-        <span class="feature-icon mono">alert_rules.evaluate()</span>
-        <h3 class="feature-title display">CONFIGURABLE ALERTS</h3>
-        <p class="feature-desc">Define thresholds per server: signal wait percentage, IO wait share, specific wait types. Evaluated on every snapshot with a 30-minute deduplication window. Critical alerts fire email notifications automatically.</p>
-        <span class="feature-tag">Per-Server Rules</span>
-      </div>
-
     </div>
   </div>
 </section>
 
-<!-- ── How it works ── -->
-<section class="how-section" id="how">
+<!-- FEATURES -->
+<section class="feat-sec" id="features">
+  <div class="container">
+    <div class="stag reveal">Core Capabilities</div>
+    <h2 class="stitle reveal">EVERY TOOL<br>A DBA NEEDS</h2>
+    <p class="sdesc reveal d1">From raw wait types to plain-English business impact — all signals in one place, with a structured workflow to action them.</p>
+    <div class="feat-grid">
+      <div class="feat-card reveal"><span class="fsrc">sys.dm_exec_query_stats + SHA-256</span><h3 class="ftitle">QUERY FINGERPRINTING</h3><p class="fdesc2">Strips literals, normalises whitespace, hashes the SQL structure. Two parameterised queries doing the same logical work share one fingerprint — enabling true trend tracking across captures.</p><span class="ftag">Regression Detection</span></div>
+      <div class="feat-card reveal d1"><span class="fsrc">sys.dm_os_wait_stats</span><h3 class="ftitle">WAIT STATS ENGINE</h3><p class="fdesc2">Real-time and snapshot-based analysis, categorised into CPU, IO, Memory, Lock, and Other. Signal-vs-resource breakdown tells you instantly whether you have CPU pressure or data pressure.</p><span class="ftag">Live Dashboard</span></div>
+      <div class="feat-card reveal d2"><span class="fsrc">Plan shape hash comparison</span><h3 class="ftitle">PLAN REGRESSION DETECTION</h3><p class="fdesc2">Hashes the structural shape of execution plans across snapshots. When a query's plan changes and performance drops simultaneously, OroDb flags it before your users notice.</p><span class="ftag">Plan Shape Hash</span></div>
+      <div class="feat-card reveal d3"><span class="fsrc">sys.dm_db_missing_index_details</span><h3 class="ftitle">CLASSIFIED INDEX RECS</h3><p class="fdesc2">Not a raw DMV dump. Each recommendation is automatically classified as HighConfidence, ReviewRequired, ConflictingDuplicate, or WriteHeavyRisk — so your team works the right ones first.</p><span class="ftag">Workflow + Classification</span></div>
+      <div class="feat-card reveal d4"><span class="fsrc">Per-server rule evaluation</span><h3 class="ftitle">CONFIGURABLE ALERTS</h3><p class="fdesc2">Define thresholds per server: signal wait %, IO wait share, specific wait types. Evaluated on every snapshot with a 30-minute deduplication window. Critical alerts fire email automatically.</p><span class="ftag">Email Notifications</span></div>
+      <div class="feat-card reveal d5"><span class="fsrc">Correlated event stream</span><h3 class="ftitle">INCIDENT TIMELINE</h3><p class="fdesc2">All alerts, regressions, plan changes, and new query fingerprints correlated chronologically. Zoom from 1 to 30 days to see exactly what changed and when — the DBA's post-mortem view.</p><span class="ftag">Root-Cause Correlation</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPATIBILITY + SECURITY -->
+<section class="compat-sec" id="compat">
   <div class="container">
     <div class="two-col">
       <div>
-        <div class="section-tag">How It Works</div>
-        <h2 class="section-title display reveal">CAPTURE.<br>CORRELATE.<br>ACT.</h2>
-        <p class="section-desc reveal reveal-delay-1">OroDb installs in minutes. Point it at any SQL Server instance and it begins building a performance history immediately — no agents, no schema changes on your monitored databases.</p>
-
-        <div class="how-steps" style="margin-top: 48px;">
-          <div class="how-step reveal">
-            <div class="step-num display">01</div>
-            <div class="step-content">
-              <h3 class="step-title display">CONNECT YOUR SERVER</h3>
-              <p class="step-desc">Add a monitored server with a read-only DMV login. Connection string encrypted at rest with AES-256 or stored in Azure Key Vault.</p>
-            </div>
-          </div>
-          <div class="how-step reveal reveal-delay-1">
-            <div class="step-num display">02</div>
-            <div class="step-content">
-              <h3 class="step-title display">CAPTURE SNAPSHOTS</h3>
-              <p class="step-desc">Manual on-demand or scheduled via cron. Each snapshot captures wait stats, top queries, and builds fingerprint trend points.</p>
-            </div>
-          </div>
-          <div class="how-step reveal reveal-delay-2">
-            <div class="step-num display">03</div>
-            <div class="step-content">
-              <h3 class="step-title display">WATCH THE TIMELINE</h3>
-              <p class="step-desc">All alerts, regressions, plan changes, and new queries correlated chronologically. See exactly what changed and when.</p>
-            </div>
-          </div>
-          <div class="how-step reveal reveal-delay-3">
-            <div class="step-num display">04</div>
-            <div class="step-content">
-              <h3 class="step-title display">RESOLVE &amp; EXPORT</h3>
-              <p class="step-desc">Approve index recommendations, assign work to team members, export incident bundles, and track the baseline recovering over time.</p>
-            </div>
-          </div>
+        <div class="stag reveal">Compatibility</div>
+        <h2 class="stitle reveal" style="font-size:clamp(38px,4vw,58px)">SQL SERVER<br>VERSIONS SUPPORTED</h2>
+        <p class="sdesc reveal d1">OroDb reads from standard SQL Server DMVs available since 2014. No extended events, no trace flags, no schema changes on your monitored databases.</p>
+        <div class="vstrip reveal d2">
+          <span class="vpill sup">SQL Server 2014</span><span class="vpill sup">SQL Server 2016</span>
+          <span class="vpill sup">SQL Server 2017</span><span class="vpill sup">SQL Server 2019</span>
+          <span class="vpill sup">SQL Server 2022</span>
+          <span class="vpill">Azure SQL (coming)</span><span class="vpill">RDS SQL (coming)</span>
         </div>
       </div>
-
-      <div class="reveal reveal-delay-2">
-        <div class="terminal">
-          <div class="terminal-bar">
-            <div class="dot dot-r"></div>
-            <div class="dot dot-y"></div>
-            <div class="dot dot-g"></div>
-            <div class="terminal-title">orodb — snapshot capture</div>
-          </div>
-          <div class="terminal-body">
-            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">orodb snapshot --server prod-sql-01</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-out">Connecting to prod-sql-01...</span></div>
-            <div class="t-line"><span class="t-ok">✓ Connection established (42ms)</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-out">Capturing wait stats...</span></div>
-            <div class="t-line"><span class="t-ok">✓ 287 wait types captured</span></div>
-            <div class="t-line"><span class="t-warn">⚠ Signal wait: 34.2% [ABOVE THRESHOLD]</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-out">Capturing top 20 queries...</span></div>
-            <div class="t-line"><span class="t-ok">✓ 20 queries fingerprinted</span></div>
-            <div class="t-line"><span class="t-err">✗ Regression: fp/a3f2c1b8 CpuMs +67%</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-out">Evaluating 3 alert rules...</span></div>
-            <div class="t-line"><span class="t-warn">⚠ AlertRule fired: CpuPressure:SignalPercent</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-ok">✓ Snapshot saved: snap/d9147cbe</span></div>
-            <div class="t-line"><span class="t-out">Duration: 1.4s</span></div>
-          </div>
-        </div>
-
-        <div class="terminal" style="margin-top: 1px;">
-          <div class="terminal-bar">
-            <div class="dot dot-r"></div>
-            <div class="dot dot-y"></div>
-            <div class="dot dot-g"></div>
-            <div class="terminal-title">baseline trending</div>
-          </div>
-          <div class="terminal-body">
-            <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">orodb trends --fingerprint a3f2c1b8</span></div>
-            <div class="t-blank"></div>
-            <div class="t-line"><span class="t-out">Fingerprint: a3f2c1b8 (14 snapshots)</span></div>
-            <div class="t-line"><span class="t-out">Baseline CPU : 124ms  Reads: 8,441</span></div>
-            <div class="t-line"><span class="t-out">Latest CPU  : 207ms  Reads: 9,102</span></div>
-            <div class="t-blank"></div>
-            <div class="t-err">⚠ REGRESSION: CpuMs +66.9% above baseline</div>
-            <div class="t-warn">  Plan hash changed: 9e4a → 7c8f</div>
-            <div class="t-out">  Detected: 2026-03-22 13:15 UTC</div>
-          </div>
+      <div class="reveal d1">
+        <div class="stag">Deployment &amp; Security</div>
+        <div class="cdetail">
+          <div class="crow"><span class="cicon">&#x1F510;</span><div class="ctxt"><strong>AES-256 encryption at rest</strong><span>All connection strings encrypted. Azure Key Vault integration available so the key never touches the OroDb database.</span></div></div>
+          <div class="crow"><span class="cicon">&#x1F464;</span><div class="ctxt"><strong>Read-only DMV login only</strong><span>OroDb only needs <code style="font-family:var(--mono);font-size:11px;color:var(--gold)">VIEW SERVER STATE</code>. No write access to your monitored databases — ever.</span></div></div>
+          <div class="crow"><span class="cicon">&#x1F4E6;</span><div class="ctxt"><strong>No agent, no schema changes</strong><span>Deployed as an ASP.NET Core app. Nothing installs on your SQL Server host. Your monitored databases are untouched.</span></div></div>
+          <div class="crow"><span class="cicon">&#x1F3E2;</span><div class="ctxt"><strong>Multi-tenant with full isolation</strong><span>Each customer's data isolated by TenantId. Users only see servers and data belonging to their organisation.</span></div></div>
+          <div class="crow"><span class="cicon">&#x1F511;</span><div class="ctxt"><strong>Microsoft + Google SSO</strong><span>Login with Microsoft Entra ID or Google OAuth. Local accounts with OTP email verification also supported.</span></div></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Roles ── -->
-<section class="roles-section" id="roles">
+<!-- WHO IT'S FOR / NOT FOR -->
+<section class="for-sec" id="for-who">
   <div class="container">
-    <div class="section-tag">Access Control</div>
-    <h2 class="section-title display reveal">THE RIGHT VIEW<br>FOR EVERY PERSON</h2>
-    <p class="section-desc reveal reveal-delay-1">OroDb adapts its interface to the user's role — DBAs see execution plans and DMV data, executives see health status and business impact.</p>
-
-    <div class="roles-grid" style="margin-top: 72px;">
-
-      <div class="role-card reveal">
-        <span class="role-badge badge-gold">SuperAdmin</span>
-        <h3 class="role-name display">PLATFORM ADMIN</h3>
-        <p class="role-desc">Full cross-tenant visibility and system configuration. Manages tenants, audit logs, and global settings.</p>
-        <ul class="role-perms">
-          <li>All tenant access</li>
-          <li>User management</li>
-          <li>Audit log access</li>
-          <li>System configuration</li>
+    <div class="stag reveal">Fit</div>
+    <h2 class="stitle reveal">WHO THIS IS FOR<br><span style="color:var(--text3)">AND WHO IT ISN'T</span></h2>
+    <p class="sdesc reveal d1">We'd rather you know upfront. OroDb is a focused investigation tool — not a full APM platform.</p>
+    <div class="for-grid">
+      <div class="for-card for-yes reveal">
+        <span class="for-lbl">Good fit &#x2713;</span>
+        <h3 class="for-ttl">THIS IS FOR YOU IF&#x2026;</h3>
+        <ul class="for-list">
+          <li>You manage 1–50 SQL Server instances and want meaningful performance history</li>
+          <li>You get paged about slow queries and spend time gathering evidence before you can act</li>
+          <li>You want a structured approval workflow for index changes — not ad-hoc scripts</li>
+          <li>You escalate to Microsoft support and need a clean, complete data package</li>
+          <li>You want your manager to understand database health without reading DMVs</li>
+          <li>You're on SQL Server 2014 or newer, on-prem or VM</li>
         </ul>
       </div>
-
-      <div class="role-card reveal reveal-delay-1">
-        <span class="role-badge badge-cyan">TenantAdmin</span>
-        <h3 class="role-name display">TENANT ADMIN</h3>
-        <p class="role-desc">Manages servers, users, alert rules, and report storage for their organisation. Full operational control.</p>
-        <ul class="role-perms">
-          <li>Server management</li>
-          <li>Alert rule creation</li>
-          <li>User invitation</li>
-          <li>Report configuration</li>
+      <div class="for-card for-no reveal d1">
+        <span class="for-lbl">Poor fit &#x2715;</span>
+        <h3 class="for-ttl">THIS ISN'T FOR YOU IF&#x2026;</h3>
+        <ul class="for-list">
+          <li>You need full APM across mixed stacks (Node, Python, Java) — use Datadog or New Relic</li>
+          <li>You're primarily on PostgreSQL or MySQL — not supported yet</li>
+          <li>You need sub-second real-time metrics streaming — snapshots are periodic, not continuous</li>
+          <li>You want automated index application without human review in the loop</li>
+          <li>You need Azure SQL Managed Instance or RDS SQL Server today — coming soon</li>
         </ul>
       </div>
-
-      <div class="role-card reveal reveal-delay-2">
-        <span class="role-badge badge-green">DbaAnalyst</span>
-        <h3 class="role-name display">DBA ANALYST</h3>
-        <p class="role-desc">Full access to snapshots, query analysis, execution plans, fingerprints, and the index recommendation workflow.</p>
-        <ul class="role-perms">
-          <li>Snapshot capture</li>
-          <li>Query analysis</li>
-          <li>Execution plans</li>
-          <li>Approve index recs</li>
-        </ul>
-      </div>
-
-      <div class="role-card reveal reveal-delay-3">
-        <span class="role-badge badge-muted">ReadOnly</span>
-        <h3 class="role-name display">EXEC VIEW</h3>
-        <p class="role-desc">Simplified health dashboard in plain English. Server health status, open issues, and ROI framing — no SQL required.</p>
-        <ul class="role-perms">
-          <li>Health overview</li>
-          <li>Issue summary</li>
-          <li>Business impact view</li>
-          <li>No raw SQL data</li>
-        </ul>
-      </div>
-
     </div>
   </div>
 </section>
 
-<!-- ── Workflow ── -->
-<section class="workflow-section" id="workflow">
+<!-- HOW IT WORKS -->
+<section class="how-sec" id="how">
   <div class="container">
-    <div class="section-tag">Index Recommendation Workflow</div>
-    <h2 class="section-title display reveal">FROM INSIGHT<br>TO ACTION</h2>
-    <p class="section-desc reveal reveal-delay-1">Every index recommendation moves through a structured approval process — classified, assigned, reviewed, and tracked to completion.</p>
-
-    <div class="workflow-cards">
-      <div class="workflow-card reveal">
-        <div class="wf-num display">01</div>
-        <span class="wf-icon">🔍</span>
-        <h3 class="wf-title display">DETECT</h3>
-        <p class="wf-desc">DMV analysis identifies missing indexes with estimated impact percentages. Auto-classified as HighConfidence, ReviewRequired, WriteHeavyRisk, or ConflictingDuplicate.</p>
+    <div class="two-col">
+      <div>
+        <div class="stag">How It Works</div>
+        <h2 class="stitle reveal">CAPTURE.<br>CORRELATE.<br>ACT.</h2>
+        <p class="sdesc reveal d1">Installs in minutes. Point it at any SQL Server instance with a read-only login and it starts building your performance history immediately.</p>
+        <div class="how-steps">
+          <div class="how-step reveal"><div class="sn">01</div><div><h3 class="sttl">CONNECT YOUR SERVER</h3><p class="sdsc">Add a monitored server with a read-only DMV login. Connection string encrypted at rest or stored in Azure Key Vault.</p></div></div>
+          <div class="how-step reveal d1"><div class="sn">02</div><div><h3 class="sttl">CAPTURE SNAPSHOTS</h3><p class="sdsc">Manual on-demand or scheduled via cron expression. Each snapshot captures wait stats, top 20 queries, and writes fingerprint trend data points.</p></div></div>
+          <div class="how-step reveal d2"><div class="sn">03</div><div><h3 class="sttl">WATCH THE TIMELINE</h3><p class="sdsc">All alerts, regressions, plan changes, and new queries correlated chronologically. See exactly what changed and when.</p></div></div>
+          <div class="how-step reveal d3"><div class="sn">04</div><div><h3 class="sttl">RESOLVE AND EXPORT</h3><p class="sdsc">Approve index recommendations, assign work, generate incident bundles, and watch baselines recovering over time.</p></div></div>
+        </div>
       </div>
-      <div class="workflow-card reveal reveal-delay-1">
-        <div class="wf-num display">02</div>
-        <span class="wf-icon">👤</span>
-        <h3 class="wf-title display">ASSIGN</h3>
-        <p class="wf-desc">Route recommendations to specific DBA team members. Comment threads keep discussion in context — no Slack threads disconnected from the actual data.</p>
-      </div>
-      <div class="workflow-card reveal reveal-delay-2">
-        <div class="wf-num display">03</div>
-        <span class="wf-icon">✓</span>
-        <h3 class="wf-title display">REVIEW</h3>
-        <p class="wf-desc">Approve, reject, or defer with notes. The generated CREATE INDEX script is right there — test it on non-production and mark it Applied when done.</p>
-      </div>
-      <div class="workflow-card reveal reveal-delay-3">
-        <div class="wf-num display">04</div>
-        <span class="wf-icon">📈</span>
-        <h3 class="wf-title display">VALIDATE</h3>
-        <p class="wf-desc">After applying an index, watch the fingerprint trend charts. CPU and reads drop, baseline recalibrates, and the regression flag clears automatically.</p>
+      <div class="reveal d2" style="padding-top:6px">
+        <div class="term">
+          <div class="term-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="term-ttl">snapshot capture — prod-sql-01</span></div>
+          <div class="term-body">
+            <div class="tl"><span class="tp">$</span><span class="tc">orodb snapshot --server prod-sql-01</span></div>
+            <div class="tb"></div>
+            <div class="tl"><span class="to">Connecting to prod-sql-01:1433...</span></div>
+            <div class="tl"><span class="tok">&#x2713; Connection established (38ms)</span></div>
+            <div class="tb"></div>
+            <div class="tl"><span class="to">Capturing wait stats (sys.dm_os_wait_stats)...</span></div>
+            <div class="tl"><span class="tok">&#x2713; 312 wait types captured</span></div>
+            <div class="tl"><span class="tw">&#x26A0; Signal wait: 34.2% — above 25% threshold</span></div>
+            <div class="tb"></div>
+            <div class="tl"><span class="to">Fingerprinting top 20 queries...</span></div>
+            <div class="tl"><span class="tok">&#x2713; 20 queries fingerprinted</span></div>
+            <div class="tl"><span class="te">&#x2717; Regression: fp/a3f2c1b8 — CpuMs +67% vs baseline</span></div>
+            <div class="tl"><span class="tw">&#x26A0; Plan hash changed: 9e4a &#x2192; 7c8f</span></div>
+            <div class="tb"></div>
+            <div class="tl"><span class="tw">&#x26A0; AlertRule fired: CpuPressure:SignalPercent=34.2 &gt; 25</span></div>
+            <div class="tb"></div>
+            <div class="tl"><span class="tok">&#x2713; Snapshot saved (snap/d9147cbe) — 1.4s</span></div>
+          </div>
+        </div>
+        <div class="term" style="margin-top:1px">
+          <div class="term-bar"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div><span class="term-ttl">regression detail — fp/a3f2c1b8</span></div>
+          <div class="term-body">
+            <div class="tl"><span class="to">Fingerprint : a3f2c1b8 &nbsp;&#x00B7;&nbsp; 14 snapshots tracked</span></div>
+            <div class="tl"><span class="to">Query &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: SELECT ... FROM Orders WHERE CustomerId = @P</span></div>
+            <div class="tb"></div>
+            <div class="tl"><span class="to">Baseline CPU  : 124ms &nbsp; &#x2190; 7-day rolling average</span></div>
+            <div class="tl"><span class="te">Latest CPU    : 207ms &nbsp; &#x2190; +67% above baseline</span></div>
+            <div class="tl"><span class="tw">Plan changed  : 2026-03-22 13:10 UTC</span></div>
+            <div class="tb"></div>
+            <div class="tl"><span class="to">&#x2192; Review plan: /trends/detail/a3f2c1b8</span></div>
+            <div class="tl"><span class="to">&#x2192; Consider Query Store plan forcing</span></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── Pricing ── -->
-<section id="pricing" style="background: var(--bg); border-top: 1px solid var(--border);">
+<!-- ROLES -->
+<section class="roles-sec" id="roles">
   <div class="container">
-    <div class="section-tag">Pricing</div>
-    <h2 class="section-title display reveal">SIMPLE,<br>PER-SERVER PRICING</h2>
-    <p class="section-desc reveal reveal-delay-1">No per-user charges. No data egress fees. Pay for the servers you monitor — that's it.</p>
-
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); margin-top: 72px;">
-
-      <div class="feature-card reveal" style="border-top: 2px solid var(--border2);">
-        <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 20px;">Starter</div>
-        <div style="font-family: var(--display); font-size: 56px; color: var(--text); margin-bottom: 4px;">FREE</div>
-        <div style="font-family: var(--mono); font-size: 12px; color: var(--text3); margin-bottom: 28px;">1 server · 30-day retention</div>
-        <p class="feature-desc" style="margin-bottom: 28px;">Full feature access on a single server. No credit card. Perfect for evaluating on your dev or staging environment.</p>
-        <a href="https://test.orodb.com" class="btn-primary" style="display: inline-flex; font-size: 12px; padding: 12px 28px;">Start Free ↗</a>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-1" style="border-top: 2px solid var(--gold); background: var(--bg3);">
-        <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px;">Professional ✦ Popular</div>
-        <div style="font-family: var(--display); font-size: 56px; color: var(--gold); margin-bottom: 4px;">$29<span style="font-size: 22px; color: var(--text3);">/mo</span></div>
-        <div style="font-family: var(--mono); font-size: 12px; color: var(--text3); margin-bottom: 28px;">per server · 1-year retention</div>
-        <p class="feature-desc" style="margin-bottom: 28px;">Unlimited users, full workflow features, incident bundles, configurable alerts, and email notifications. Everything for a production DBA team.</p>
-        <a href="https://test.orodb.com" class="btn-primary" style="display: inline-flex; font-size: 12px; padding: 12px 28px;">Get Started ↗</a>
-      </div>
-
-      <div class="feature-card reveal reveal-delay-2" style="border-top: 2px solid var(--border2);">
-        <div style="font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text3); margin-bottom: 20px;">Enterprise</div>
-        <div style="font-family: var(--display); font-size: 56px; color: var(--text); margin-bottom: 4px;">Custom</div>
-        <div style="font-family: var(--mono); font-size: 12px; color: var(--text3); margin-bottom: 28px;">volume · on-prem · SLA</div>
-        <p class="feature-desc" style="margin-bottom: 28px;">Private cloud deployment, dedicated support, custom retention, SSO/Entra ID integration, and volume discounts for large SQL Server estates.</p>
-        <a href="mailto:hello@orodb.com" class="btn-ghost" style="display: inline-flex; font-size: 12px; padding: 12px 28px;">Contact Sales ↗</a>
-      </div>
-
+    <div class="stag reveal">Access Control</div>
+    <h2 class="stitle reveal">THE RIGHT VIEW<br>FOR EVERY PERSON</h2>
+    <p class="sdesc reveal d1">OroDb adapts its interface to the user's role. DBAs see execution plans and DMV data. Executives see health status and business impact — no SQL required.</p>
+    <div class="roles-grid">
+      <div class="role-card reveal"><span class="rbadge bg">SuperAdmin</span><h3 class="rname">PLATFORM ADMIN</h3><p class="rdesc">Full cross-tenant visibility and system configuration.</p><ul class="rperms"><li>All tenant access</li><li>User management</li><li>Audit log access</li><li>System configuration</li></ul></div>
+      <div class="role-card reveal d1"><span class="rbadge bc">TenantAdmin</span><h3 class="rname">TENANT ADMIN</h3><p class="rdesc">Manages servers, users, alert rules, and storage for their org.</p><ul class="rperms"><li>Server management</li><li>Alert rule creation</li><li>User invitation</li><li>Report configuration</li></ul></div>
+      <div class="role-card reveal d2"><span class="rbadge bge">DbaAnalyst</span><h3 class="rname">DBA ANALYST</h3><p class="rdesc">Full access to snapshots, query analysis, plans, and the index workflow.</p><ul class="rperms"><li>Snapshot capture</li><li>Execution plan viewer</li><li>Fingerprint trends</li><li>Approve index recs</li></ul></div>
+      <div class="role-card reveal d3"><span class="rbadge bm">ReadOnly</span><h3 class="rname">EXEC VIEW</h3><p class="rdesc">Health dashboard in plain English. No SQL, no plans, no raw data.</p><ul class="rperms"><li>Health overview</li><li>Business impact framing</li><li>Issue summaries</li><li>Read-only, no actions</li></ul></div>
     </div>
   </div>
 </section>
 
-<!-- ── CTA ── -->
-<section class="cta-section">
-  <div class="container" style="position: relative; z-index: 1;">
-    <p class="cta-eyebrow">Ready to see your SQL Server clearly?</p>
-    <h2 class="cta-title display reveal">
-      YOUR FIRST<br>
-      SNAPSHOT IS<br>
-      <span class="gold">FREE.</span>
-    </h2>
-    <p class="cta-desc reveal reveal-delay-1">
-      No agents. No schema changes. No vendor lock-in. Connect a read-only login and see your query fingerprints in under 60 seconds.
-    </p>
-    <div class="hero-actions reveal reveal-delay-2">
-      <a href="https://test.orodb.com" class="btn-primary">Start Monitoring Free ↗</a>
-      <a href="mailto:hello@orodb.com" class="btn-ghost">Talk to the Team</a>
+<!-- WORKFLOW -->
+<section class="wf-sec" id="workflow">
+  <div class="container">
+    <div class="stag reveal">Index Recommendation Workflow</div>
+    <h2 class="stitle reveal">FROM INSIGHT<br>TO APPLIED</h2>
+    <p class="sdesc reveal d1">Every index recommendation moves through a structured process — classified automatically, assigned to a DBA, reviewed, and tracked to completion with a full comment trail.</p>
+    <div class="wf-cards">
+      <div class="wf-card reveal"><div class="wfn">01</div><span class="wf-icon">&#x1F50D;</span><h3 class="wf-ttl">DETECT</h3><p class="wf-dsc">DMV analysis identifies missing indexes with estimated impact. Auto-classified: HighConfidence, ReviewRequired, WriteHeavyRisk, or ConflictingDuplicate.</p></div>
+      <div class="wf-card reveal d1"><div class="wfn">02</div><span class="wf-icon">&#x1F464;</span><h3 class="wf-ttl">ASSIGN</h3><p class="wf-dsc">Route recommendations to specific DBA team members. Comment threads keep discussion in context — tied to the actual recommendation, not a Slack thread 3 days later.</p></div>
+      <div class="wf-card reveal d2"><div class="wfn">03</div><span class="wf-icon">&#x2713;</span><h3 class="wf-ttl">REVIEW</h3><p class="wf-dsc">Approve, reject, or defer with notes. The generated CREATE INDEX script is right there — test on non-production, then mark Applied when done.</p></div>
+      <div class="wf-card reveal d3"><div class="wfn">04</div><span class="wf-icon">&#x1F4C8;</span><h3 class="wf-ttl">VALIDATE</h3><p class="wf-dsc">After applying an index, watch the fingerprint trend chart. CPU and reads drop, the baseline recalibrates, the regression flag clears automatically over 3–7 snapshots.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ── Footer ── -->
+<!-- PRICING -->
+<section class="price-sec" id="pricing">
+  <div class="container">
+    <div class="stag reveal">Pricing</div>
+    <h2 class="stitle reveal">SIMPLE,<br>PER-SERVER PRICING</h2>
+    <p class="sdesc reveal d1">No per-user charges. No data egress fees. Pay for the servers you monitor — that's it.</p>
+    <div class="price-grid">
+      <div class="pcard reveal">
+        <p class="ptier">Starter</p>
+        <p class="pval">FREE</p>
+        <p class="pper">1 server &nbsp;&#x00B7;&nbsp; 30-day retention &nbsp;&#x00B7;&nbsp; unlimited users</p>
+        <p class="pdesc">Full feature access on a single server. No credit card. Evaluate on dev or staging — then add production when ready.</p>
+        <ul class="pfeats"><li>All features included</li><li>Query fingerprinting + trends</li><li>Incident bundle export</li><li>Unlimited team members</li><li>30-day snapshot retention</li></ul>
+        <a href="https://test.orodb.com/auth/register" class="btn-p" style="font-size:11px;padding:11px 24px">Start Free &#x2014; No Card &#x2197;</a>
+      </div>
+      <div class="pcard feat reveal d1">
+        <p class="ptier pop">Professional &#x2726; Most popular</p>
+        <p class="pval gold">$29<span style="font-size:20px;color:var(--text3)">/mo</span></p>
+        <p class="pper">per server &nbsp;&#x00B7;&nbsp; 1-year retention &nbsp;&#x00B7;&nbsp; unlimited users</p>
+        <p class="pdesc">Everything for a production DBA team — full workflow features, email alerts, incident bundles, and configurable alert rules.</p>
+        <ul class="pfeats"><li>Everything in Starter</li><li>1-year snapshot retention</li><li>Configurable alert rules</li><li>Email notifications</li><li>Index approval workflow</li><li>Priority support</li></ul>
+        <a href="https://test.orodb.com/auth/register" class="btn-p" style="font-size:11px;padding:11px 24px">Get Started &#x2197;</a>
+      </div>
+      <div class="pcard reveal d2">
+        <p class="ptier">Enterprise</p>
+        <p class="pval">Custom</p>
+        <p class="pper">volume &nbsp;&#x00B7;&nbsp; on-prem option &nbsp;&#x00B7;&nbsp; SLA</p>
+        <p class="pdesc">Private deployment, dedicated support, Azure Entra ID SSO, custom retention, and volume discounts for large SQL Server estates.</p>
+        <ul class="pfeats"><li>Everything in Professional</li><li>Private deployment option</li><li>Azure Entra ID SSO</li><li>Custom retention policy</li><li>Dedicated support SLA</li><li>Volume discounts</li></ul>
+        <a href="mailto:hello@orodb.com" class="btn-g" style="font-size:11px;padding:11px 24px">Contact Sales &#x2197;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust-bar">
+  <div class="trust-item reveal"><span class="t-icon">&#x1F510;</span><div><div class="t-ttl">AES-256 Encryption</div><div class="t-txt">All connection strings encrypted at rest. Azure Key Vault integration available.</div></div></div>
+  <div class="trust-item reveal d1"><span class="t-icon">&#x1F441;</span><div><div class="t-ttl">Read-Only Access Only</div><div class="t-txt">OroDb never writes to your monitored databases. VIEW SERVER STATE only.</div></div></div>
+  <div class="trust-item reveal d2"><span class="t-icon">&#x1F4E6;</span><div><div class="t-ttl">No Agent Required</div><div class="t-txt">Nothing installs on your SQL Server host. No schema changes. No trace flags.</div></div></div>
+  <div class="trust-item reveal d3"><span class="t-icon">&#x1F3E2;</span><div><div class="t-ttl">Full Tenant Isolation</div><div class="t-txt">Multi-tenant architecture. Your data never touches another customer's workspace.</div></div></div>
+</div>
+
+<!-- CTA -->
+<section class="cta-sec">
+  <div class="cta-glow"></div>
+  <div class="container" style="position:relative;z-index:1">
+    <p class="cta-ey reveal">Ready to stop guessing?</p>
+    <h2 class="cta-ttl reveal">YOUR FIRST<br>SERVER IS<br><span class="gold">ALWAYS FREE.</span></h2>
+    <p class="cta-dsc reveal d1">Connect a read-only login and see your first query fingerprints within 60 seconds. No credit card. No agents. No risk.</p>
+    <div class="cta-opts reveal d2">
+      <div class="cta-opt">
+        <div class="co-lbl">Try it yourself</div>
+        <div class="co-ttl">START FREE</div>
+        <div class="co-dsc">1 server, all features, no time limit. Best for individual DBAs evaluating on dev or staging.</div>
+        <a href="https://test.orodb.com/auth/register" class="btn-p">Create Free Account &#x2197;</a>
+      </div>
+      <div class="cta-opt primary">
+        <div class="co-lbl">See it live first</div>
+        <div class="co-ttl">LIVE DEMO</div>
+        <div class="co-dsc">Walk through a pre-loaded environment with real query trends, regressions, and an incident bundle — no signup needed.</div>
+        <a href="https://test.orodb.com" class="btn-og">Open Demo &#x2197;</a>
+      </div>
+      <div class="cta-opt">
+        <div class="co-lbl">Team or enterprise</div>
+        <div class="co-ttl">TALK TO US</div>
+        <div class="co-dsc">Multiple servers, on-prem, SSO, or volume pricing? Let's find the right setup for your team.</div>
+        <a href="mailto:hello@orodb.com" class="btn-g">Email Us &#x2197;</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer>
-  <div class="footer-logo">ORODB</div>
-  <div class="footer-links">
-    <a href="#features">Features</a>
-    <a href="#workflow">Workflow</a>
-    <a href="#roles">Roles</a>
-    <a href="#pricing">Pricing</a>
-    <a href="https://test.orodb.com">App</a>
+  <div class="f-logo">ORODB</div>
+  <div class="f-links">
+    <a href="#features">Features</a><a href="#for-who">Who It's For</a>
+    <a href="#compat">Compatibility</a><a href="#workflow">Workflow</a>
+    <a href="#pricing">Pricing</a><a href="https://test.orodb.com">App</a>
     <a href="mailto:hello@orodb.com">Contact</a>
   </div>
-  <div class="footer-copy mono">© 2026 OroDb. Built for DBAs.</div>
+  <div class="f-copy">&#xa9; 2026 OroDb. Built for DBAs.</div>
 </footer>
 
 <script>
-// ── Scroll reveal ──
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      observer.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// ── Counter animation ──
-const counterObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    const el = e.target;
-    const target = parseInt(el.dataset.target || '0');
-    const suffix = el.dataset.suffix || '';
-    if (target === 0 && suffix) {
-      animateCounter(el, 120, suffix);
-    } else {
-      animateCounter(el, target, suffix);
-    }
-    counterObserver.unobserve(el);
-  });
-}, { threshold: 0.5 });
-
-document.querySelectorAll('[data-target]').forEach(el => counterObserver.observe(el));
-
-function animateCounter(el, target, suffix) {
-  const duration = 1600;
-  const start = performance.now();
-  function update(now) {
-    const elapsed = now - start;
-    const progress = Math.min(elapsed / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
-    const current = Math.round(eased * target);
-    el.textContent = current.toLocaleString() + suffix;
-    if (progress < 1) requestAnimationFrame(update);
-  }
-  requestAnimationFrame(update);
-}
-
-// ── Mobile nav toggle (simple) ──
-document.querySelector('.nav-cta')?.addEventListener('click', function(e) {
-  // allow normal navigation
-});
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 </script>
 </body>
 </html>
