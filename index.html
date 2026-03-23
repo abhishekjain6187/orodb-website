@@ -24,51 +24,30 @@
   color-scheme: dark;
 }
 
-/* ── Light theme (activated by OS/browser setting) ── */
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg:#f5f4f0; --bg2:#ffffff; --bg3:#eeecea; --bg4:#f0efeb;
-    --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
-    --gold:#8a6a1a; --gold2:#6b5014; --gold-dim:rgba(138,106,26,0.15); --gold-glow:rgba(138,106,26,0.06);
-    --cyan:#0077a8; --cyan-dim:rgba(0,119,168,0.1);
-    --red:#c0392b; --green:#1a7a3a; --amber:#a05c08;
-    --text:#1a1a1a; --text2:#4a5568; --text3:#5a6d80;
-    color-scheme: light;
-  }
-
-  /* Light: soften the noise overlay */
-  body::before { opacity: 0.012; }
-
-  /* Light: adjust hero grid lines */
-  .hero-grid {
-    background-image:
-      linear-gradient(rgba(138,106,26,0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(138,106,26,0.06) 1px, transparent 1px);
-  }
-
-  /* Light: nav background */
-  nav { background: rgba(245,244,240,0.92); }
-
-  /* Light: terminal gets a dark bg even in light mode — code is always dark */
-  .term { background: #1a1f26; border-color: rgba(0,0,0,0.2); }
-  .term-bar { background: #242c36; border-color: rgba(0,0,0,0.2); }
-
-  /* Light: mockup window */
-  .mock-win { box-shadow: 0 -20px 80px rgba(138,106,26,0.06), 0 4px 24px rgba(0,0,0,0.08); }
-
-  /* Light: pricing featured card */
-  .pcard.feat { border-top-color: var(--gold); }
-
-  /* Light: sparkline base bar */
-  .sb { background: #cbd5e0; }
-
-  /* Light: sidebar items */
-  .side-item.act { background: rgba(138,106,26,0.08); }
-
-  /* Light: hero glow */
-  .hero-glow { background: radial-gradient(ellipse, rgba(138,106,26,0.07) 0%, transparent 68%); }
-  .cta-glow  { background: radial-gradient(ellipse, rgba(138,106,26,0.05) 0%, transparent 65%); }
+/* ── Light theme (toggled via data-theme="light" on <html>) ── */
+[data-theme="light"] {
+  --bg:#f5f4f0; --bg2:#ffffff; --bg3:#eeecea; --bg4:#f0efeb;
+  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.14);
+  --gold:#8a6a1a; --gold2:#6b5014; --gold-dim:rgba(138,106,26,0.15); --gold-glow:rgba(138,106,26,0.06);
+  --cyan:#0077a8; --cyan-dim:rgba(0,119,168,0.1);
+  --red:#c0392b; --green:#1a7a3a; --amber:#a05c08;
+  --text:#1a1a1a; --text2:#4a5568; --text3:#5a6d80;
+  color-scheme: light;
 }
+[data-theme="light"] body::before { opacity: 0.012; }
+[data-theme="light"] .hero-grid {
+  background-image:
+    linear-gradient(rgba(138,106,26,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(138,106,26,0.06) 1px, transparent 1px);
+}
+[data-theme="light"] nav { background: rgba(245,244,240,0.92); }
+[data-theme="light"] .term { background: #1a1f26; border-color: rgba(0,0,0,0.2); }
+[data-theme="light"] .term-bar { background: #242c36; border-color: rgba(0,0,0,0.2); }
+[data-theme="light"] .mock-win { box-shadow: 0 -20px 80px rgba(138,106,26,0.06), 0 4px 24px rgba(0,0,0,0.08); }
+[data-theme="light"] .sb { background: #cbd5e0; }
+[data-theme="light"] .side-item.act { background: rgba(138,106,26,0.08); }
+[data-theme="light"] .hero-glow { background: radial-gradient(ellipse, rgba(138,106,26,0.07) 0%, transparent 68%); }
+[data-theme="light"] .cta-glow  { background: radial-gradient(ellipse, rgba(138,106,26,0.05) 0%, transparent 65%); }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6;overflow-x:hidden}
@@ -81,6 +60,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:0 48px;height:62px;d
 .nav-links{display:flex;gap:32px;align-items:center}
 .nav-links a{font-size:12px;font-weight:500;color:var(--text2);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s}
 .nav-links a:hover{color:var(--gold)}
+.nav-links a.active{color:var(--gold)}
+
+/* Theme toggle */
+.theme-toggle{background:none;border:1px solid var(--border2);color:var(--text2);cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:15px;transition:color .2s,border-color .2s;flex-shrink:0}
+.theme-toggle:hover{color:var(--gold);border-color:var(--gold-dim)}
 .nav-cta{background:var(--gold);color:#080a0c;padding:8px 22px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;transition:background .2s,transform .1s}
 .nav-cta:hover{background:var(--gold2);transform:translateY(-1px)}
 
@@ -527,12 +511,21 @@ footer { padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 48px); }
 </div>
 
 <nav>
-  <a href="#" class="nav-logo">OroDb<span class="nav-logo-v">v1.0</span></a>
+  <a href="#" class="nav-logo">
+    <svg width="17" height="19" viewBox="0 0 17 19" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <ellipse cx="8.5" cy="3.5" rx="7.5" ry="3" fill="var(--gold)" opacity="0.85"/>
+      <path d="M1 3.5V15.5" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
+      <path d="M16 3.5V15.5" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
+      <ellipse cx="8.5" cy="15.5" rx="7.5" ry="3" fill="none" stroke="var(--gold)" stroke-width="1.5" opacity="0.7"/>
+      <ellipse cx="8.5" cy="9.5" rx="7.5" ry="2.5" fill="none" stroke="var(--gold)" stroke-width="1" opacity="0.35"/>
+    </svg>
+    OroDb<span class="nav-logo-v">v1.0</span>
+  </a>
   <div class="nav-links" id="navLinks">
     <a href="#features" onclick="closeMenu()">Features</a>
     <a href="#for-who" onclick="closeMenu()">Who It's For</a>
     <a href="#workflow" onclick="closeMenu()">Workflow</a>
-    <a href="#pricing" onclick="closeMenu()">Pricing</a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle light/dark mode">☀</button>
     <a href="https://test.orodb.com" target="_blank" class="nav-cta" onclick="closeMenu()">Open App →</a>
   </div>
   <button class="nav-hamburger" id="navHamburger" onclick="toggleMenu()" aria-label="Open menu">
@@ -546,9 +539,8 @@ footer { padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 48px); }
   <a href="#for-who"   onclick="closeMenu()">Who It's For</a>
   <a href="#compat"    onclick="closeMenu()">Compatibility</a>
   <a href="#workflow"  onclick="closeMenu()">Workflow</a>
-  <a href="#pricing"   onclick="closeMenu()">Pricing</a>
   <a href="https://test.orodb.com" target="_blank" onclick="closeMenu()">Open App ↗</a>
-  <a href="mailto:hello@orodb.com" onclick="closeMenu()">Contact</a>
+  <a href="/cdn-cgi/l/email-protection#a6cec3cacac9e6c9d4c9c2c488c5c9cb" onclick="closeMenu()">Contact</a>
 </div>
 
 <!-- HERO -->
@@ -565,7 +557,7 @@ footer { padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 48px); }
       <div class="hero-cta-row">
         <a href="https://test.orodb.com/auth/register" class="btn-p">Start Free — 1 Server ↗</a>
         <a href="https://test.orodb.com" class="btn-og">Try Live Demo</a>
-        <a href="mailto:hello@orodb.com" class="btn-g">Talk to a DBA</a>
+        <a href="/cdn-cgi/l/email-protection#5139343d3d3e113e233e35337f323e3c" class="btn-g">Talk to a DBA</a>
       </div>
       <p class="cta-note">No credit card &nbsp;·&nbsp; No agents &nbsp;·&nbsp; No schema changes on monitored databases</p>
     </div>
@@ -849,8 +841,8 @@ footer { padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 48px); }
   </div>
 </section>
 
-<!-- PRICING -->
-<section class="price-sec" id="pricing">
+<!-- PRICING — hidden -->
+<section class="price-sec" id="pricing" style="display:none" aria-hidden="true">
   <div class="container">
     <div class="stag reveal">Pricing</div>
     <h2 class="stitle reveal">SIMPLE,<br>PER-SERVER PRICING</h2>
@@ -878,7 +870,7 @@ footer { padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 48px); }
         <p class="pper">volume &nbsp;&#x00B7;&nbsp; on-prem option &nbsp;&#x00B7;&nbsp; SLA</p>
         <p class="pdesc">Private deployment, dedicated support, Azure Entra ID SSO, custom retention, and volume discounts for large SQL Server estates.</p>
         <ul class="pfeats"><li>Everything in Professional</li><li>Private deployment option</li><li>Azure Entra ID SSO</li><li>Custom retention policy</li><li>Dedicated support SLA</li><li>Volume discounts</li></ul>
-        <a href="mailto:hello@orodb.com" class="btn-g" style="font-size:11px;padding:11px 24px">Contact Sales &#x2197;</a>
+        <a href="/cdn-cgi/l/email-protection#1f777a7373705f706d707b7d317c7072" class="btn-g" style="font-size:11px;padding:11px 24px">Contact Sales &#x2197;</a>
       </div>
     </div>
   </div>
@@ -916,7 +908,7 @@ footer { padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 48px); }
         <div class="co-lbl">Team or enterprise</div>
         <div class="co-ttl">TALK TO US</div>
         <div class="co-dsc">Multiple servers, on-prem, SSO, or volume pricing? Let's find the right setup for your team.</div>
-        <a href="mailto:hello@orodb.com" class="btn-g">Email Us &#x2197;</a>
+        <a href="/cdn-cgi/l/email-protection#adc5c8c1c1c2edc2dfc2c9cf83cec2c0" class="btn-g">Email Us &#x2197;</a>
       </div>
     </div>
   </div>
@@ -927,13 +919,13 @@ footer { padding: clamp(28px, 4vw, 44px) clamp(20px, 4vw, 48px); }
   <div class="f-links">
     <a href="#features">Features</a><a href="#for-who">Who It's For</a>
     <a href="#compat">Compatibility</a><a href="#workflow">Workflow</a>
-    <a href="#pricing">Pricing</a><a href="https://test.orodb.com">App</a>
-    <a href="mailto:hello@orodb.com">Contact</a>
+    <a href="https://test.orodb.com">App</a>
+    <a href="/cdn-cgi/l/email-protection#cba3aea7a7a48ba4b9a4afa9e5a8a4a6">Contact</a>
   </div>
   <div class="f-copy">&#xa9; 2026 OroDb. Built for DBAs.</div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
 }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
@@ -961,10 +953,51 @@ function closeMenu() {
   btn.classList.remove('open');
   document.body.style.overflow = '';
 }
-// Close menu on resize to desktop
-window.addEventListener('resize', function() {
-  if (window.innerWidth > 1023) closeMenu();
-});
+
+// ── Theme toggle ──
+(function() {
+  var html = document.documentElement;
+  var btn  = document.getElementById('themeToggle');
+  var stored = localStorage.getItem('orodb-theme');
+  if (stored === 'light') { html.setAttribute('data-theme','light'); btn.textContent = '☾'; }
+  else { html.setAttribute('data-theme','dark'); btn.textContent = '☀'; }
+  btn.addEventListener('click', function() {
+    var isLight = html.getAttribute('data-theme') === 'light';
+    if (isLight) {
+      html.setAttribute('data-theme','dark');
+      btn.textContent = '☀';
+      localStorage.setItem('orodb-theme','dark');
+    } else {
+      html.setAttribute('data-theme','light');
+      btn.textContent = '☾';
+      localStorage.setItem('orodb-theme','light');
+    }
+  });
+})();
+
+// ── Active nav link on scroll ──
+(function() {
+  var sections = ['features','for-who','workflow'];
+  var links = {};
+  sections.forEach(function(id) {
+    var el = document.querySelector('.nav-links a[href="#' + id + '"]');
+    if (el) links[id] = el;
+  });
+  var secEls = sections.map(function(id) { return document.getElementById(id); }).filter(Boolean);
+  function onScroll() {
+    var scrollY = window.scrollY + 120;
+    var active = null;
+    secEls.forEach(function(sec) {
+      if (sec && sec.offsetTop <= scrollY) active = sec.id;
+    });
+    Object.keys(links).forEach(function(id) {
+      if (id === active) links[id].classList.add('active');
+      else links[id].classList.remove('active');
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
 </script>
 </body>
 </html>
