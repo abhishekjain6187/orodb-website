@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>OroDb — SQL Server Performance Investigation</title>
-<meta name="description" content="OroDb turns SQL Server telemetry into an investigation: query fingerprinting, regression detection against rolling baselines, and one-click incident bundles."/>
-<meta property="og:title" content="OroDb — SQL Server Performance Investigation"/>
-<meta property="og:description" content="Monitoring tells you it's slow. OroDb tells you why."/>
+<title>OroDb — Database Performance Investigation · SQL Server, PostgreSQL, MySQL, Oracle</title>
+<meta name="description" content="OroDb turns SQL Server telemetry into an investigation: query fingerprinting, regression detection against rolling baselines, and one-click incident bundles. PostgreSQL, MySQL and Oracle support in preview."/>
+<meta property="og:title" content="OroDb — Database Performance Investigation"/>
+<meta property="og:description" content="Monitoring tells you it's slow. OroDb tells you why. SQL Server, with PostgreSQL, MySQL and Oracle in preview."/>
 <meta property="og:type" content="website"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -246,6 +246,25 @@ section{padding:clamp(80px,9vw,128px) 0}
 .vers{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px}
 .vpill{font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;padding:7px 14px;border:1px solid var(--line2);color:var(--muted);background:rgba(253,251,244,.5)}
 .vpill.on{border-color:var(--gold-line);color:var(--gold-deep);background:var(--card)}
+/* preview: verified against a live instance, but without production mileage.
+   Dashed edge so it reads as "not the same commitment" at a glance. */
+.vpill.prev{border-style:dashed;border-color:var(--gold-line);color:var(--muted);background:var(--card)}
+
+/* ── engines (multi-engine preview) ── */
+.engines{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.eng-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:8px}
+.eng{background:var(--card);padding:30px 26px 28px;display:flex;flex-direction:column;gap:14px}
+.eng-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.eng h3{font-family:var(--serif);font-size:21px;font-weight:500;color:var(--ink)}
+.eng .ver{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--faint)}
+.eng .src{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--gold-deep);text-transform:none}
+.eng ul{list-style:none;display:flex;flex-direction:column;gap:9px;font-size:14px;line-height:1.6}
+.eng li{display:flex;gap:10px;align-items:flex-start;color:var(--muted)}
+.eng li::before{font-family:var(--mono);font-size:12px;line-height:1.5;flex-shrink:0}
+.eng li.y::before{content:'✓';color:var(--green)}
+.eng li.n::before{content:'—';color:var(--faint)}
+.eng li.w::before{content:'!';color:var(--terra)}
+@media(max-width:900px){.eng-grid{grid-template-columns:1fr}}
 .vnote{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:16px;line-height:1.7}
 .plat-lbl{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:18px}
 
@@ -321,6 +340,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
     <div class="nav-links">
       <a href="#bundle">Incident bundles</a>
       <a href="#capabilities">Capabilities</a>
+      <a href="#engines">Engines</a>
       <a href="#how">How it works</a>
       <a href="#security">Security</a>
       <a href="https://test.orodb.com" target="_blank" rel="noopener" class="nav-cta">Open the app</a>
@@ -334,6 +354,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <div class="mobile-menu" id="mobileMenu">
   <a href="#bundle">Incident bundles</a>
   <a href="#capabilities">Capabilities</a>
+  <a href="#engines">Engines</a>
   <a href="#how">How it works</a>
   <a href="#security">Security</a>
   <a href="https://test.orodb.com" target="_blank" rel="noopener">Open the app</a>
@@ -343,14 +364,14 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <!-- ═══ HERO ═══ -->
 <header class="hero">
   <div class="hero-in">
-    <p class="eyebrow">SQL Server performance investigation</p>
+    <p class="eyebrow">Database performance investigation</p>
     <h1>Monitoring tells you it&rsquo;s slow.<br><em class="oro">OroDb tells you why.</em></h1>
     <p class="lede">OroDb fingerprints every query, watches each one against its own rolling baseline, and correlates plan changes, wait stats, and alerts on a single timeline &mdash; then packages the evidence into a one-click incident bundle when it&rsquo;s time to escalate.</p>
     <div class="hero-cta">
       <a href="https://test.orodb.com" class="btn btn-terra" target="_blank" rel="noopener">Open the live demo <span class="arr">&rarr;</span></a>
       <a href="https://test.orodb.com/auth/register" class="btn btn-ghost" target="_blank" rel="noopener">Create an account</a>
     </div>
-    <p class="hero-note"><b>Read-only access</b> &nbsp;&middot;&nbsp; no agents &nbsp;&middot;&nbsp; nothing installs on your SQL Server host</p>
+    <p class="hero-note"><b>Read-only access</b> &nbsp;&middot;&nbsp; no agents &nbsp;&middot;&nbsp; nothing installs on your database host</p>
   </div>
 
   <!-- signature: regression evidence chart -->
@@ -415,6 +436,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
       <span>Plan shape hashing</span>
       <span>VIEW SERVER STATE only</span>
       <span>SQL Server 2014 &ndash; 2022 &middot; Azure SQL</span>
+      <span>PostgreSQL &middot; MySQL &middot; Oracle in preview</span>
     </div>
   </div>
 </header>
@@ -498,12 +520,63 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
     </div>
     <div class="caps-grid">
       <article class="cap reveal"><span class="src">sys.dm_exec_query_stats + SHA-256</span><h3>Query fingerprinting</h3><p>Literals stripped, whitespace normalized, structure hashed. Two parameterized queries doing the same logical work share one fingerprint &mdash; which is what makes honest trend tracking possible across captures.</p></article>
-      <article class="cap reveal d1"><span class="src">sys.dm_os_wait_stats</span><h3>Wait stats engine</h3><p>Real-time and snapshot-based analysis, categorized into CPU, IO, Memory, Lock, and Other. The signal-versus-resource breakdown tells you at a glance whether you have CPU pressure or data pressure.</p></article>
+      <article class="cap reveal d1"><span class="src">sys.dm_os_wait_stats &middot; per-engine equivalents</span><h3>Wait stats engine</h3><p>Real-time and snapshot-based analysis, categorized into CPU, I/O, Memory, Lock, Network, and Other &mdash; the same six categories on every supported engine, so blocking reads as blocking whether it came from a SQL Server <code>LCK_</code> wait, a PostgreSQL lock event, or an Oracle enqueue. On SQL Server, the signal-versus-resource breakdown tells you at a glance whether you have CPU pressure or data pressure.</p></article>
       <article class="cap reveal d2"><span class="src">Plan shape hash comparison</span><h3>Plan regression detection</h3><p>OroDb hashes the structural shape of execution plans across snapshots. When a plan changes and performance drops at the same time, it&rsquo;s flagged &mdash; before your users notice.</p></article>
       <article class="cap reveal d3"><span class="src">sys.dm_db_missing_index_details</span><h3>Classified index recommendations</h3><p>Not a raw DMV dump. Each recommendation is classified as HighConfidence, ReviewRequired, ConflictingDuplicate, or WriteHeavyRisk &mdash; so your team works the right ones first.</p></article>
       <article class="cap reveal d4"><span class="src">Per-server rule evaluation</span><h3>Configurable alerts</h3><p>Define thresholds per server: signal wait percentage, IO wait share, specific wait types. Rules are evaluated on every snapshot with a 30-minute deduplication window; critical alerts send email automatically.</p></article>
       <article class="cap reveal d5"><span class="src">Correlated event stream</span><h3>Incident timeline</h3><p>Alerts, regressions, plan changes, and new fingerprints on one chronological view. Zoom from 1 to 30 days to see exactly what changed and when &mdash; the post-mortem view, available before the post-mortem.</p></article>
     </div>
+  </div>
+</section>
+
+<!-- ═══ ENGINES ═══ -->
+<section class="engines" id="engines">
+  <div class="container">
+    <div class="sec-head reveal">
+      <p class="eyebrow">Beyond SQL Server</p>
+      <h2>PostgreSQL, MySQL and Oracle &mdash; <em class="oro">in preview</em></h2>
+      <p class="lede">The same investigation model, reading each engine&rsquo;s own native telemetry rather than pretending every database is SQL Server. Each is verified against a live instance. <b>SQL Server remains the engine with production mileage</b> &mdash; the three below are new, and we&rsquo;d rather tell you that than let you find out.</p>
+    </div>
+    <div class="eng-grid">
+
+      <article class="eng reveal">
+        <div class="eng-top"><h3>PostgreSQL</h3><span class="ver">verified on 17.10</span></div>
+        <span class="src">pg_stat_activity &middot; pg_stat_statements</span>
+        <ul>
+          <li class="y">Live wait analysis and active sessions &mdash; no extension, no restart, works on a stock install</li>
+          <li class="y">Lock, I/O, client and on-CPU backends classified natively</li>
+          <li class="w">Waits are a point-in-time sample, not totals since restart &mdash; PostgreSQL has no cumulative wait store, and the dashboard says so instead of implying otherwise</li>
+          <li class="w">Top queries need the <code>pg_stat_statements</code> extension, which requires a restart to enable</li>
+          <li class="n">No execution plans or missing-index recommendations</li>
+        </ul>
+      </article>
+
+      <article class="eng reveal d1">
+        <div class="eng-top"><h3>MySQL</h3><span class="ver">verified on 8.4.11</span></div>
+        <span class="src">performance_schema</span>
+        <ul>
+          <li class="y">Cumulative wait totals and statement digests on a stock install</li>
+          <li class="y">Lock waits and client socket waits separated from storage I/O</li>
+          <li class="w">Per-session live wait detail needs the <code>events_waits_*</code> consumers, which MySQL 8 disables by default</li>
+          <li class="w">MySQL reports no per-query CPU time, so OroDb shows it as unavailable rather than substituting wall-clock</li>
+          <li class="n">No execution plans or missing-index recommendations</li>
+        </ul>
+      </article>
+
+      <article class="eng reveal d2">
+        <div class="eng-top"><h3>Oracle</h3><span class="ver">verified on 23c &middot; 26ai Free</span></div>
+        <span class="src">v$system_event &middot; v$session &middot; v$sql</span>
+        <ul>
+          <li class="y">Cumulative wait events by class, active sessions, and top SQL by elapsed time</li>
+          <li class="y"><b>No Diagnostics Pack licence required.</b> OroDb reads core RDBMS views only &mdash; never ASH or AWR, which are separately licensed and audited</li>
+          <li class="y">Full statement text captured, not the truncated 1,000-character form</li>
+          <li class="w">Needs <code>SELECT</code> on the V_$ views (or <code>SELECT_CATALOG_ROLE</code>)</li>
+          <li class="n">No execution plans or missing-index recommendations</li>
+        </ul>
+      </article>
+
+    </div>
+    <p class="vnote">Execution plans and missing-index recommendations are genuinely SQL Server-only: they rely on the cached showplan XML and <code>sys.dm_db_missing_index_details</code>, which have no equivalent on the other engines. OroDb hides those panels rather than showing an empty one, and every screen states which engine it is reading and what that engine can and cannot report.</p>
   </div>
 </section>
 
@@ -516,7 +589,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
     </div>
     <div class="how-grid">
       <div>
-        <div class="step reveal"><span class="n">i.</span><div><h3>Connect a server</h3><p>Add any SQL Server instance with a read-only DMV login. The connection string is encrypted at rest, or held in Azure Key Vault so the key never touches OroDb&rsquo;s own database.</p></div></div>
+        <div class="step reveal"><span class="n">i.</span><div><h3>Connect a server</h3><p>Add a SQL Server, PostgreSQL, MySQL or Oracle instance with a read-only monitoring login. OroDb builds the right connection string for the engine you pick and tells you the exact grant that engine needs. The connection string is encrypted at rest, or held in Azure Key Vault so the key never touches OroDb&rsquo;s own database.</p></div></div>
         <div class="step reveal d1"><span class="n">ii.</span><div><h3>Capture snapshots</h3><p>On demand, or on a schedule you define with a cron expression. Each snapshot records wait stats and the top 20 queries, and writes a new data point to every fingerprint&rsquo;s trend.</p></div></div>
         <div class="step reveal d2"><span class="n">iii.</span><div><h3>Read the timeline</h3><p>Alerts, regressions, plan changes, and newly seen queries land on one correlated timeline. Root cause stops being an archaeology project.</p></div></div>
         <div class="step reveal d3"><span class="n">iv.</span><div><h3>Act, and watch it recover</h3><p>Approve and assign index recommendations, export incident bundles, and watch the baseline recalibrate. Regression flags clear on their own as the trend returns to normal.</p></div></div>
@@ -570,7 +643,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
     <div class="sec-head reveal">
       <p class="eyebrow">Honest fit</p>
       <h2>Who this is for &mdash; <em class="oro">and who it isn&rsquo;t</em></h2>
-      <p class="lede">We&rsquo;d rather you know upfront. OroDb is a focused investigation tool for SQL Server, not a full APM platform.</p>
+      <p class="lede">We&rsquo;d rather you know upfront. OroDb is a focused database investigation tool &mdash; deepest on SQL Server, newly in preview on PostgreSQL, MySQL and Oracle &mdash; not a full APM platform.</p>
     </div>
     <div class="fit-grid">
       <div class="fit-col yes reveal">
@@ -582,13 +655,14 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
           <li>You escalate to Microsoft support and need a clean, complete data package</li>
           <li>You want your manager to understand database health without reading DMVs</li>
           <li>You&rsquo;re on SQL Server 2014 or newer, on-prem, VM, or Azure SQL</li>
+          <li>You run PostgreSQL, MySQL or Oracle alongside SQL Server and want one investigation tool rather than four dashboards</li>
         </ul>
       </div>
       <div class="fit-col no reveal d1">
         <h3>This isn&rsquo;t for you <em>if&hellip;</em></h3>
         <ul>
           <li>You need full APM across mixed stacks &mdash; Node, Python, Java &mdash; a general-purpose APM suite fits better</li>
-          <li>You&rsquo;re primarily on PostgreSQL or MySQL &mdash; not supported yet</li>
+          <li>You need PostgreSQL, MySQL or Oracle as your <em>primary</em> engine today &mdash; those are in preview, and SQL Server is the one with production mileage</li>
           <li>You need sub-second metric streaming &mdash; snapshots are periodic, not continuous</li>
           <li>You want indexes applied automatically with no human review in the loop</li>
           <li>You need RDS SQL Server today &mdash; it&rsquo;s on the roadmap</li>
@@ -604,7 +678,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
     <div class="sec-head reveal">
       <p class="eyebrow">Security &amp; compatibility</p>
       <h2>Built to be trusted with <em class="oro">production</em></h2>
-      <p class="lede">OroDb reads from standard DMVs available since SQL Server 2014. No extended events, no trace flags, no schema changes on the databases it watches.</p>
+      <p class="lede">OroDb reads from standard DMVs available since SQL Server 2014, and from each other engine&rsquo;s own catalog views. No extended events, no trace flags, no schema changes on the databases it watches &mdash; and on Oracle, nothing that requires a Diagnostics Pack licence.</p>
     </div>
     <div class="secure-grid">
       <div class="reveal">
@@ -614,11 +688,11 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
         </div>
         <div class="srow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
-          <div><b>Read-only, by design</b><span>OroDb needs only <code>VIEW SERVER STATE</code>. It never writes to a monitored database &mdash; ever.</span></div>
+          <div><b>Read-only, by design</b><span>SQL Server needs only <code>VIEW SERVER STATE</code>; PostgreSQL <code>pg_monitor</code>; MySQL <code>SELECT</code> on performance_schema plus <code>PROCESS</code>; Oracle <code>SELECT</code> on the V_$ views. It never writes to a monitored database &mdash; ever.</span></div>
         </div>
         <div class="srow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M6 8l1.6 1.6L10.5 6.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <div><b>No agent, no schema changes</b><span>Deployed as an ASP.NET Core application. Nothing installs on your SQL Server host; your monitored databases are untouched.</span></div>
+          <div><b>No agent, no schema changes</b><span>Deployed as an ASP.NET Core application. Nothing installs on your database host, whichever engine it runs; your monitored databases are untouched.</span></div>
         </div>
         <div class="srow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="3" width="5" height="10" rx="0.5" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="3" width="5" height="10" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
@@ -639,9 +713,13 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
           <span class="vpill on">SQL Server 2022</span>
           <span class="vpill on">Azure SQL Database *</span>
           <span class="vpill on">Azure SQL Managed Instance</span>
+          <span class="vpill prev">PostgreSQL 13&ndash;17 &middot; preview</span>
+          <span class="vpill prev">MySQL 8.x &middot; preview</span>
+          <span class="vpill prev">Oracle 12c+ &middot; preview</span>
           <span class="vpill">RDS SQL Server &middot; roadmap</span>
         </div>
-        <p class="vnote">* Azure SQL Database: the server-configuration section is omitted from incident bundles, as sys.configurations is not exposed there.</p>
+        <p class="vnote">* Azure SQL Database: the server-configuration section is omitted from incident bundles, as sys.configurations is not exposed there.<br/>
+          Solid outline = production mileage. Dashed = preview: verified against a live instance of that engine, with the per-engine limits listed above.</p>
       </div>
     </div>
   </div>
