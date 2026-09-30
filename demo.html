@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>OroDb — Interactive Demo</title>
+<meta name="description" content="An interactive demo of OroDb: live wait-statistics analysis, query fingerprinting and regression detection. Synthetic data, no sign-up, nothing to install."/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://orodb.com/demo.html"/>
+
+<meta property="og:title" content="OroDb — Interactive Demo"/>
+<meta property="og:description" content="Click through a working OroDb dashboard. Synthetic data, no sign-up required."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://orodb.com/demo.html"/>
+<meta property="og:site_name" content="OroDb"/>
+<meta property="og:image" content="https://orodb.com/assets/brand/og-dark.png"/>
+<meta property="og:image:width" content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:image:alt" content="OroDb - database performance investigation"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="OroDb - Interactive Demo"/>
+<meta name="twitter:description" content="Click through a working OroDb dashboard. Synthetic data, no sign-up required."/>
+<meta name="twitter:image" content="https://orodb.com/assets/brand/og-dark.png"/>
+
+<link rel="icon" href="favicon.ico" sizes="any"/>
+<link rel="icon" href="favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png"/>
+<link rel="manifest" href="site.webmanifest"/>
+<meta name="theme-color" content="#0B1220"/>
+
+<style>
+@font-face{font-family:'IBM Plex Sans';src:url('assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('assets/fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('assets/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('assets/fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+
+/* Tokens lifted from the application's own orodb.css so the demo cannot drift from
+   the product. Gold is identity only; blue is action; category colours carry meaning. */
+:root{
+  --bg:#0B1220; --bg-surface:#080E18; --bg-card:#111827; --bg-card2:#182233;
+  --border:#273449; --border-strong:#3A4A63;
+  --text-primary:#F8FAFC; --text-secondary:#A7B2C3; --text-muted:#8494A8;
+  --accent:#60A5FA; --cyan:#22D3EE; --green:#4ADE80; --amber:#F59E0B;
+  --red:#F87171; --purple:#A78BFA; --blue:#60A5FA;
+  --cat-cpu:#60A5FA; --cat-io:#22D3EE; --cat-mem:#A78BFA;
+  --cat-other:#94A3B8; --cat-lock:#FB923C; --cat-net:#2DD4BF;
+  --brand:#D4A72C; --brand-ink:#D4A72C; --brand-soft:rgba(212,167,44,.14);
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;
+  --shadow:0 18px 40px -28px rgba(0,0,0,.75);
+}
+:root[data-theme="light"]{
+  --bg:#F8FAFC; --bg-surface:#FFFFFF; --bg-card:#FFFFFF; --bg-card2:#F1F5F9;
+  --border:#E2E8F0; --border-strong:#CBD5E1;
+  --text-primary:#111827; --text-secondary:#475569; --text-muted:#5A6B80;
+  --accent:#2563EB; --blue:#2563EB; --cyan:#0E7490; --green:#15803D;
+  --amber:#B45309; --red:#DC2626; --purple:#7C3AED;
+  --cat-cpu:#2563EB; --cat-io:#0E7490; --cat-mem:#7C3AED;
+  --cat-other:#64748B; --cat-lock:#C2410C; --cat-net:#0F766E;
+  --brand-ink:#8A6516; --brand-soft:rgba(212,167,44,.18);
+  --shadow:0 18px 40px -30px rgba(15,23,42,.30);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text-primary);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* ── demo notice ── */
+.demo-bar{background:var(--brand-soft);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;text-align:center}
+.demo-bar b{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--brand-ink);border:1px solid var(--brand-ink);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.demo-bar span{font-size:13px;color:var(--text-secondary)}
+.demo-bar a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+
+/* ── shell ── */
+.shell{display:grid;grid-template-columns:232px 1fr;min-height:calc(100vh - 42px)}
+.side{background:var(--bg-surface);border-right:1px solid var(--border);padding:18px 0;display:flex;flex-direction:column;gap:4px}
+.brandrow{display:flex;align-items:center;gap:10px;padding:0 18px 18px;border-bottom:1px solid var(--border);margin-bottom:12px}
+.brandrow img{width:28px;height:28px;display:block}
+.brandrow .nm{font-weight:600;font-size:16px;letter-spacing:-.01em}
+.brandrow .vr{font-family:var(--mono);font-size:9.5px;color:var(--text-muted);letter-spacing:.1em}
+.navsec{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);padding:14px 18px 6px}
+.navlink{display:flex;align-items:center;gap:11px;padding:9px 18px;color:var(--text-secondary);text-decoration:none;border-left:2px solid transparent;font-size:13.5px;cursor:pointer;background:none;border-top:0;border-right:0;border-bottom:0;width:100%;text-align:left;font-family:inherit}
+.navlink:hover{background:var(--bg-card2);color:var(--text-primary)}
+.navlink[aria-current="page"]{background:var(--brand-soft);border-left-color:var(--brand);color:var(--text-primary);font-weight:500}
+.navlink svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+
+.main{padding:20px 24px 56px;min-width:0}
+
+/* ── toolbar ── */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.page-title{font-size:21px;font-weight:600;letter-spacing:-.01em;margin-right:auto}
+.sel,.btn{font-family:var(--sans);font-size:13px;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:7px;padding:7px 11px;cursor:pointer}
+.sel:hover,.btn:hover{border-color:var(--accent)}
+.btn-act{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.btn-act:hover{filter:brightness(1.08)}
+.badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border-strong);border-radius:999px;padding:5px 11px;color:var(--text-secondary)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
+.dot.warn{background:var(--amber)} .dot.bad{background:var(--red)}
+.hint{font-family:var(--mono);font-size:10.5px;color:var(--text-muted)}
+
+/* ── banners ── */
+.banner{border-radius:9px;padding:12px 15px;margin-bottom:16px;font-size:13.5px;display:flex;gap:11px;align-items:flex-start;border:1px solid}
+.banner-warn{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.42);color:var(--text-primary)}
+.banner-err{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.42);color:var(--text-primary)}
+.banner b{display:block;margin-bottom:3px}
+.banner svg{width:17px;height:17px;flex:none;margin-top:1px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+
+/* ── kpis ── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--kpi,var(--accent));border-radius:9px;padding:13px 15px;min-width:0}
+.kpi-l{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text-muted);margin-bottom:7px}
+.kpi-v{font-size:25px;font-weight:600;letter-spacing:-.02em;line-height:1.1;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.kpi-s{font-size:11.5px;color:var(--text-muted);margin-top:3px}
+
+/* ── cards / grid ── */
+.row{display:grid;gap:14px;margin-bottom:16px}
+.row-2{grid-template-columns:minmax(0,320px) minmax(0,1fr)}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:11px;overflow:hidden;min-width:0}
+.card-h{display:flex;align-items:center;gap:10px;padding:12px 15px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.card-t{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--text-secondary);margin-right:auto}
+.card-b{padding:15px}
+
+/* donut */
+.donut-wrap{display:flex;align-items:center;justify-content:center;position:relative;padding:6px 0 2px}
+.donut-c{position:absolute;text-align:center;pointer-events:none}
+.donut-v{font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.donut-l{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-top:3px}
+.legend{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.leg{display:flex;align-items:center;gap:9px;font-size:12.5px;min-width:0}
+.leg i{width:9px;height:9px;border-radius:2px;flex:none}
+.leg .nm{color:var(--text-secondary);overflow-wrap:anywhere}
+.leg .vl{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--text-primary);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* bars */
+.bars{display:flex;flex-direction:column;gap:11px}
+.bar{min-width:0}
+.bar-top{display:flex;gap:10px;font-size:12.5px;margin-bottom:5px;align-items:baseline}
+.bar-nm{font-family:var(--mono);font-size:12px;overflow-wrap:anywhere}
+.bar-vl{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--text-secondary);white-space:nowrap;font-variant-numeric:tabular-nums}
+.bar-tr{height:7px;background:var(--bg-card2);border-radius:99px;overflow:hidden}
+.bar-fl{height:100%;border-radius:99px;transition:width .55s cubic-bezier(.4,0,.2,1)}
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 13px;text-align:left;white-space:nowrap}
+th{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--bg-card2);position:sticky;top:0}
+th.s{cursor:pointer;user-select:none}
+th.s:hover{color:var(--text-primary)}
+th.s::after{content:'';display:inline-block;width:0;height:0;margin-left:6px;vertical-align:middle;border-left:4px solid transparent;border-right:4px solid transparent;opacity:.35;border-top:5px solid currentColor}
+th.s[data-dir="asc"]::after{border-top:0;border-bottom:5px solid currentColor;opacity:1}
+th.s[data-dir="desc"]::after{opacity:1}
+td{border-bottom:1px solid var(--border);color:var(--text-secondary)}
+tbody tr:hover td{background:var(--bg-card2)}
+td.n{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+td.mono{font-family:var(--mono);color:var(--text-primary)}
+.pill{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;padding:2.5px 8px;border-radius:999px;border:1px solid currentColor}
+.share{display:flex;align-items:center;gap:8px;min-width:110px}
+.share-tr{flex:1;height:5px;background:var(--bg-card2);border-radius:99px;overflow:hidden;min-width:44px}
+.share-fl{height:100%;border-radius:99px}
+
+.inp{font-family:var(--sans);font-size:12.5px;background:var(--bg-card2);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:7px;padding:6px 10px;min-width:0;width:150px}
+.inp::placeholder{color:var(--text-muted)}
+
+.empty{padding:36px 18px;text-align:center;color:var(--text-muted)}
+.empty svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.6;margin-bottom:10px;opacity:.7}
+.empty b{display:block;color:var(--text-secondary);font-weight:500;margin-bottom:4px}
+.empty small{font-size:12px}
+
+/* query rows */
+.q{display:block;width:100%;text-align:left;background:var(--bg-card);border:1px solid var(--border);border-radius:9px;padding:13px 15px;cursor:pointer;font-family:inherit;color:inherit;margin-bottom:10px}
+.q:hover{border-color:var(--accent);background:var(--bg-card2)}
+.q-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:7px}
+.q-fp{font-family:var(--mono);font-size:12.5px;color:var(--brand-ink);font-weight:500}
+.q-sql{font-family:var(--mono);font-size:12px;color:var(--text-secondary);overflow-wrap:anywhere;line-height:1.55}
+.q-m{display:flex;gap:18px;margin-top:9px;flex-wrap:wrap}
+.q-m div{font-size:11.5px;color:var(--text-muted)}
+.q-m b{display:block;font-family:var(--mono);font-size:14px;color:var(--text-primary);font-weight:500;font-variant-numeric:tabular-nums}
+
+/* detail */
+.det{background:var(--bg-card);border:1px solid var(--border);border-radius:11px;padding:0;margin-bottom:16px;overflow:hidden}
+.det-h{display:flex;gap:12px;align-items:center;padding:13px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.chart-box{padding:16px;overflow-x:auto}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;padding:0 16px 16px}
+.plan-c{border:1px solid var(--border);border-radius:9px;padding:12px 14px;min-width:0}
+.plan-c h4{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:400;margin-bottom:8px}
+.plan-c p{font-family:var(--mono);font-size:12.5px;overflow-wrap:anywhere;line-height:1.6}
+.plan-old{border-color:rgba(148,163,184,.4)}
+.plan-new{border-color:rgba(248,113,113,.45);background:rgba(248,113,113,.06)}
+
+/* timeline */
+.tl{position:relative;padding-left:26px}
+.tl::before{content:'';position:absolute;left:7px;top:5px;bottom:5px;width:2px;background:var(--border)}
+.tl-i{position:relative;padding-bottom:20px}
+.tl-i::before{content:'';position:absolute;left:-23px;top:4px;width:11px;height:11px;border-radius:50%;background:var(--bg);border:2px solid var(--c,var(--accent))}
+.tl-t{font-family:var(--mono);font-size:10.5px;color:var(--text-muted);margin-bottom:3px}
+.tl-x{font-size:13.5px;font-weight:500;margin-bottom:2px}
+.tl-d{font-size:12.5px;color:var(--text-secondary);overflow-wrap:anywhere}
+
+.foot{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap;align-items:center}
+.foot a{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--text-secondary)}
+.foot a:hover{color:var(--brand-ink)}
+.foot small{font-family:var(--mono);font-size:10.5px;color:var(--text-muted)}
+
+.burger{display:none}
+
+@media (max-width:940px){
+  .row-2{grid-template-columns:1fr}
+}
+@media (max-width:780px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;inset:42px auto 0 0;width:232px;transform:translateX(-100%);transition:transform .25s ease;z-index:40;overflow-y:auto;box-shadow:var(--shadow)}
+  .side.open{transform:none}
+  .scrim{position:fixed;inset:42px 0 0;background:rgba(2,6,15,.55);z-index:30;opacity:0;pointer-events:none;transition:opacity .25s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .burger{display:inline-flex;align-items:center;gap:8px}
+  .main{padding:16px 16px 48px}
+  .page-title{font-size:18px;width:100%;order:-1}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="demo-bar">
+  <b>Demo</b>
+  <span>Synthetic data on a fictional estate — nothing here touches a real database.
+    <a href="index.html">Back to orodb.com</a></span>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Demo navigation">
+    <div class="brandrow">
+      <img src="assets/brand/mark/orodb-mark-gold.svg" alt="" width="28" height="28"/>
+      <div>
+        <div class="nm">OroDb</div>
+        <div class="vr">DEMO BUILD</div>
+      </div>
+    </div>
+    <div class="navsec">Analysis</div>
+    <button class="navlink" data-view="dash" aria-current="page">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      Wait Statistics</button>
+    <button class="navlink" data-view="queries">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      Query Analysis</button>
+    <button class="navlink" data-view="timeline">
+      <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      Timeline</button>
+    <div class="navsec">Estate</div>
+    <button class="navlink" data-view="servers">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg>
+      Servers</button>
+  </nav>
+
+  <main class="main">
+    <div class="toolbar">
+      <button class="btn burger" id="burger" aria-label="Open navigation" aria-expanded="false" aria-controls="side">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        Menu
+      </button>
+      <h1 class="page-title" id="ttl">Wait Statistics</h1>
+
+      <label class="hint" for="srv">Server</label>
+      <select class="sel" id="srv" aria-label="Select server"></select>
+
+      <select class="sel" id="ivl" aria-label="Refresh interval">
+        <option value="4000">Auto · 4s</option>
+        <option value="8000">Auto · 8s</option>
+        <option value="0">Manual</option>
+      </select>
+
+      <button class="btn btn-act" id="refresh">Refresh</button>
+
+      <span class="badge"><span class="dot" id="dot"></span><span id="stat">Live</span></span>
+
+      <button class="btn" id="theme" aria-label="Toggle colour theme" title="Toggle light / dark">
+        <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
+
+    <div id="views"></div>
+
+    <div class="foot">
+      <div>
+        <a href="index.html">orodb.com</a>
+      </div>
+      <small id="stamp"></small>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ────────────────────────────────────────────────────────────────────────────
+   Synthetic estate. Deliberately fictional: fake hostnames, fake fingerprints,
+   fake plan hashes. The shapes are realistic — wait time is power-law
+   distributed, so a handful of types dominate — but none of it is real data.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+var CATS = {
+  cpu:   {label:'CPU',     v:'--cat-cpu'},
+  io:    {label:'I/O',     v:'--cat-io'},
+  mem:   {label:'Memory',  v:'--cat-mem'},
+  lock:  {label:'Locking', v:'--cat-lock'},
+  net:   {label:'Network', v:'--cat-net'},
+  other: {label:'Other',   v:'--cat-other'}
+};
+
+var SERVERS = [
+  {
+    id:'prod-sql-01', name:'PROD-SQL-01', engine:'SQL Server 2022', view:'sys.dm_os_wait_stats',
+    state:'ok', uptimeDays:47, activeReqs:31, signalPct:9.4,
+    waits:[
+      {t:'PAGEIOLATCH_SH',           c:'io',    ms:4820000, n:182400},
+      {t:'CXPACKET',                 c:'cpu',   ms:2610000, n:96200},
+      {t:'WRITELOG',                 c:'io',    ms:1930000, n:214800},
+      {t:'LCK_M_IX',                 c:'lock',  ms:1140000, n:8900},
+      {t:'PAGEIOLATCH_EX',           c:'io',    ms:842000,  n:41300},
+      {t:'SOS_SCHEDULER_YIELD',      c:'cpu',   ms:615000,  n:1284000},
+      {t:'RESOURCE_SEMAPHORE',       c:'mem',   ms:398000,  n:2140},
+      {t:'ASYNC_NETWORK_IO',         c:'net',   ms:286000,  n:73400},
+      {t:'MEMORY_ALLOCATION_EXT',    c:'mem',   ms:141000,  n:498000},
+      {t:'LATCH_EX',                 c:'other', ms:96400,   n:31200},
+      {t:'BACKUPIO',                 c:'io',    ms:71200,   n:1840},
+      {t:'THREADPOOL',               c:'cpu',   ms:24800,   n:640}
+    ],
+    queries:[
+      {fp:'a3f2c1b8', sql:'SELECT … FROM Orders WHERE CustomerId = @P', cpu:207, base:124, execs:184200, reads:9840, regressed:true,
+       planOld:'9e4a', planNew:'7c8f', oldOp:'Index Seek (IX_Orders_CustomerId)', newOp:'Clustered Index Scan', changedAt:'6 days ago'},
+      {fp:'7d1e04af', sql:'UPDATE Inventory SET Qty = Qty - @N WHERE SkuId = @S', cpu:88, base:81, execs:96400, reads:1240, regressed:false},
+      {fp:'c5b90d22', sql:'SELECT TOP 50 … FROM AuditTrail ORDER BY CreatedAt DESC', cpu:412, base:398, execs:8200, reads:41800, regressed:false},
+      {fp:'11ff82ac', sql:'EXEC dbo.RebuildDailyRollup @Day = @D', cpu:9840, base:9210, execs:24, reads:812400, regressed:false},
+      {fp:'6a0c7e93', sql:'SELECT … FROM Shipments s JOIN Carriers c ON …', cpu:143, base:139, execs:52100, reads:6120, regressed:false}
+    ]
+  },
+  {
+    id:'pg-analytics-02', name:'PG-ANALYTICS-02', engine:'PostgreSQL 17.10', view:'pg_stat_activity · pg_stat_statements',
+    state:'warn', uptimeDays:12, activeReqs:58, signalPct:31.7,
+    waits:[
+      {t:'CPU',                      c:'cpu',   ms:6410000, n:441000},
+      {t:'IO:DataFileRead',          c:'io',    ms:2180000, n:184200},
+      {t:'LWLock:BufferMapping',     c:'mem',   ms:1420000, n:96400},
+      {t:'Lock:transactionid',       c:'lock',  ms:918000,  n:4210},
+      {t:'IO:WALWrite',              c:'io',    ms:642000,  n:128400},
+      {t:'Client:ClientRead',        c:'net',   ms:412000,  n:214000},
+      {t:'LWLock:WALInsert',         c:'mem',   ms:218000,  n:84200},
+      {t:'IPC:ParallelFinish',       c:'other', ms:104000,  n:12400},
+      {t:'Timeout:VacuumDelay',      c:'other', ms:48200,   n:960}
+    ],
+    queries:[
+      {fp:'d84b1c07', sql:'SELECT … FROM events WHERE occurred_at >= $1 GROUP BY 1,2', cpu:1840, base:602, execs:14200, reads:284000, regressed:true,
+       planOld:'b21c', planNew:'4fd9', oldOp:'Index Scan using events_occurred_at_idx', newOp:'Parallel Seq Scan', changedAt:'2 days ago'},
+      {fp:'2e9a55b1', sql:'INSERT INTO events (…) VALUES (…) ON CONFLICT DO NOTHING', cpu:31, base:29, execs:1840000, reads:410, regressed:false},
+      {fp:'9c3f7a0e', sql:'REFRESH MATERIALIZED VIEW CONCURRENTLY mv_daily', cpu:48200, base:46100, execs:12, reads:1920000, regressed:false},
+      {fp:'5b7d2e46', sql:'SELECT … FROM accounts a LEFT JOIN plans p ON …', cpu:94, base:91, execs:284000, reads:2840, regressed:false}
+    ]
+  },
+  {
+    id:'mysql-app-03', name:'MYSQL-APP-03', engine:'MySQL 8.4.11', view:'performance_schema',
+    state:'ok', uptimeDays:94, activeReqs:12, signalPct:6.1,
+    waits:[
+      {t:'wait/io/file/innodb/innodb_data_file', c:'io',   ms:1840000, n:214000},
+      {t:'wait/io/file/innodb/innodb_log_file',  c:'io',   ms:942000,  n:184000},
+      {t:'wait/lock/table/sql/handler',          c:'lock', ms:412000,  n:9200},
+      {t:'wait/synch/mutex/innodb/buf_pool',     c:'mem',  ms:284000,  n:412000},
+      {t:'wait/io/socket/sql/client_connection',  c:'net',  ms:141000,  n:84200},
+      {t:'wait/synch/cond/sql/MDL_context',      c:'other',ms:62400,   n:2840}
+    ],
+    queries:[
+      {fp:'f0a71b93', sql:'SELECT … FROM sessions WHERE token = ?', cpu:12, base:11, execs:4210000, reads:84, regressed:false},
+      {fp:'8b24ce50', sql:'UPDATE carts SET updated_at = ? WHERE id = ?', cpu:24, base:22, execs:842000, reads:210, regressed:false},
+      {fp:'3d97f1a2', sql:'SELECT … FROM order_items oi JOIN products p ON …', cpu:186, base:178, execs:94200, reads:8420, regressed:false}
+    ]
+  },
+  {
+    id:'dr-sql-04', name:'DR-SQL-04', engine:'SQL Server 2019', view:'sys.dm_os_wait_stats',
+    state:'unreachable', uptimeDays:0, activeReqs:0, signalPct:0,
+    waits:[], queries:[]
+  }
+];
+
+/* ── state ───────────────────────────────────────────────────────────────── */
+var view = 'dash', srvId = SERVERS[0].id, timer = null, tick = 0;
+var sort = {key:'ms', dir:'desc'}, filter = '', openFp = null;
+var $ = function(s,r){ return (r||document).querySelector(s); };
+
+function srv(){ return SERVERS.filter(function(s){ return s.id === srvId; })[0]; }
+function cssVar(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+/* Jitter makes the "live" poll feel live without ever changing the story:
+   the ordering and the regression stay stable, only the magnitudes drift. */
+function jitter(base, pct){
+  var f = 1 + (Math.sin(tick * 1.7 + base % 97) * (pct || 0.02));
+  return Math.max(1, Math.round(base * f));
+}
+function fmtMs(ms){
+  if (ms >= 3600000) return (ms/3600000).toFixed(1) + ' h';
+  if (ms >= 60000)   return (ms/60000).toFixed(1) + ' min';
+  if (ms >= 1000)    return (ms/1000).toFixed(1) + ' s';
+  return ms + ' ms';
+}
+function fmtN(n){ return n.toLocaleString('en-GB'); }
+
+function liveWaits(){
+  return srv().waits.map(function(w){
+    var ms = jitter(w.ms, 0.035), n = jitter(w.n, 0.03);
+    return {t:w.t, c:w.c, ms:ms, n:n, avg:ms/n};
+  });
+}
+function catTotals(ws){
+  var m = {}; Object.keys(CATS).forEach(function(k){ m[k] = 0; });
+  ws.forEach(function(w){ m[w.c] += w.ms; });
+  return m;
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* ── empty / error states ────────────────────────────────────────────────── */
+function unreachable(){
+  return '<div class="banner banner-err">' +
+    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>' +
+    '<div><b>Cannot reach ' + esc(srv().name) + '</b>' +
+    'The last connection attempt timed out. OroDb keeps serving the history it already ' +
+    'captured, and retries on the next poll — it never blocks the rest of the estate on ' +
+    'one unreachable host.</div></div>' +
+    '<div class="card"><div class="card-b"><div class="empty">' +
+    '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg>' +
+    '<b>No live statistics for this server</b>' +
+    '<small>Pick another server from the selector above to continue the demo.</small>' +
+    '</div></div></div>';
+}
+
+/* ── donut (hand-drawn SVG, no chart library) ────────────────────────────── */
+function donut(tot){
+  var keys = Object.keys(CATS).filter(function(k){ return tot[k] > 0; });
+  var sum = keys.reduce(function(a,k){ return a + tot[k]; }, 0) || 1;
+  var R = 62, C = 2 * Math.PI * R, off = 0, seg = '';
+  keys.forEach(function(k){
+    var frac = tot[k] / sum, len = frac * C;
+    seg += '<circle cx="80" cy="80" r="' + R + '" fill="none" stroke="' + cssVar(CATS[k].v) + '"' +
+           ' stroke-width="17" stroke-dasharray="' + len.toFixed(2) + ' ' + (C - len).toFixed(2) + '"' +
+           ' stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 80 80)"></circle>';
+    off += len;
+  });
+  var leg = keys.sort(function(a,b){ return tot[b] - tot[a]; }).map(function(k){
+    return '<div class="leg"><i style="background:' + cssVar(CATS[k].v) + '"></i>' +
+           '<span class="nm">' + CATS[k].label + '</span>' +
+           '<span class="vl">' + (tot[k] / sum * 100).toFixed(1) + '%</span></div>';
+  }).join('');
+  return '<div class="donut-wrap"><svg width="160" height="160" viewBox="0 0 160 160" role="img" ' +
+         'aria-label="Wait time by category">' + seg + '</svg>' +
+         '<div class="donut-c"><div class="donut-v">' + keys.length + '</div>' +
+         '<div class="donut-l">categories</div></div></div>' +
+         '<div class="legend">' + leg + '</div>';
+}
+
+/* ── views ───────────────────────────────────────────────────────────────── */
+function vDash(){
+  var s = srv();
+  if (s.state === 'unreachable') return unreachable();
+
+  var ws = liveWaits();
+  var tot = catTotals(ws);
+  var total = ws.reduce(function(a,w){ return a + w.ms; }, 0);
+  var tasks = ws.reduce(function(a,w){ return a + w.n; }, 0);
+  var sig = jitter(Math.round(s.signalPct * 10), 0.05) / 10;
+  var io = (tot.io / total * 100);
+
+  var warn = sig > 25 ? '<div class="banner banner-warn">' +
+    '<svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>' +
+    '<div><b>CPU pressure — signal waits at ' + sig.toFixed(1) + '%</b>' +
+    'Above roughly 25%, tasks are spending more time waiting for a scheduler than for a ' +
+    'resource. That points at CPU, not storage.</div></div>' : '';
+
+  var kpis = [
+    ['Total Wait Time', fmtMs(total), 'since last restart', '--accent'],
+    ['Signal Wait %', sig.toFixed(1) + '%', 'CPU scheduling', sig > 25 ? '--red' : '--amber'],
+    ['Active Requests', fmtN(jitter(s.activeReqs, .12)), 'currently running', '--red'],
+    ['Avg Wait / Task', (total / tasks).toFixed(1), 'milliseconds', '--green'],
+    ['Wait Types', String(ws.length), 'observed', '--purple'],
+    ['I/O Waits %', io.toFixed(1) + '%', 'of total wait time', '--blue']
+  ].map(function(k){
+    return '<div class="kpi" style="--kpi:var(' + k[3] + ')"><div class="kpi-l">' + k[0] + '</div>' +
+           '<div class="kpi-v">' + k[1] + '</div><div class="kpi-s">' + k[2] + '</div></div>';
+  }).join('');
+
+  var top = ws.slice().sort(function(a,b){ return b.ms - a.ms; }).slice(0, 6);
+  var mx = top[0].ms;
+  var bars = top.map(function(w){
+    return '<div class="bar"><div class="bar-top"><span class="bar-nm">' + esc(w.t) + '</span>' +
+      '<span class="bar-vl">' + fmtMs(w.ms) + '</span></div>' +
+      '<div class="bar-tr"><div class="bar-fl" style="width:' + (w.ms / mx * 100).toFixed(1) +
+      '%;background:' + cssVar(CATS[w.c].v) + '"></div></div></div>';
+  }).join('');
+
+  // table: filter then sort
+  var rows = ws.filter(function(w){
+    return !filter || w.t.toLowerCase().indexOf(filter) > -1 || CATS[w.c].label.toLowerCase().indexOf(filter) > -1;
+  }).sort(function(a,b){
+    var k = sort.key, av = k === 't' ? a.t : a[k], bv = k === 't' ? b.t : b[k];
+    if (typeof av === 'string') return sort.dir === 'asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sort.dir === 'asc' ? av - bv : bv - av;
+  });
+
+  var body = rows.length ? rows.map(function(w){
+    var col = cssVar(CATS[w.c].v);
+    return '<tr><td class="mono">' + esc(w.t) + '</td>' +
+      '<td><span class="pill" style="color:' + col + '">' + CATS[w.c].label + '</span></td>' +
+      '<td class="n">' + fmtN(w.ms) + '</td>' +
+      '<td class="n">' + fmtN(w.n) + '</td>' +
+      '<td class="n">' + w.avg.toFixed(2) + '</td>' +
+      '<td><div class="share"><div class="share-tr"><div class="share-fl" style="width:' +
+      (w.ms / total * 100).toFixed(1) + '%;background:' + col + '"></div></div>' +
+      '<span class="bar-vl">' + (w.ms / total * 100).toFixed(1) + '%</span></div></td></tr>';
+  }).join('') : '';
+
+  var tbl = rows.length
+    ? '<div class="tbl-wrap"><table><thead><tr>' +
+      th('t','Wait Type') + th('c','Cat') + th('ms','Wait (ms)') +
+      th('n','Tasks') + th('avg','Avg (ms)') + th('ms2','Share') +
+      '</tr></thead><tbody>' + body + '</tbody></table></div>'
+    : '<div class="empty"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
+      '<b>No wait type matches &ldquo;' + esc(filter) + '&rdquo;</b>' +
+      '<small>Clear the filter to see all ' + ws.length + ' types.</small></div>';
+
+  return warn + '<div class="kpis">' + kpis + '</div>' +
+    '<div class="row row-2">' +
+      '<div class="card"><div class="card-h"><span class="card-t">Wait time by category</span></div>' +
+        '<div class="card-b">' + donut(tot) + '</div></div>' +
+      '<div class="card"><div class="card-h"><span class="card-t">Top wait types</span>' +
+        '<span class="hint">' + esc(s.view) + '</span></div>' +
+        '<div class="card-b"><div class="bars">' + bars + '</div></div></div>' +
+    '</div>' +
+    '<div class="card"><div class="card-h"><span class="card-t">Top wait types — detail</span>' +
+      '<input class="inp" id="flt" type="search" placeholder="Filter…" value="' + esc(filter) +
+      '" aria-label="Filter wait types"/>' +
+      '<span class="badge">' + rows.length + ' of ' + ws.length + '</span></div>' + tbl + '</div>';
+}
+function th(k, label){
+  var key = k === 'ms2' ? 'ms' : k;
+  var d = sort.key === key ? ' data-dir="' + sort.dir + '"' : '';
+  return '<th class="s" data-k="' + key + '"' + d + ' scope="col">' + label + '</th>';
+}
+
+function vQueries(){
+  var s = srv();
+  if (s.state === 'unreachable') return unreachable();
+
+  var list = s.queries.map(function(q){
+    var d = ((q.cpu - q.base) / q.base * 100);
+    var bad = q.regressed;
+    return '<button class="q" data-fp="' + q.fp + '">' +
+      '<div class="q-top"><span class="q-fp">fp/' + q.fp + '</span>' +
+      (bad ? '<span class="pill" style="color:var(--red)">Regression · +' + d.toFixed(0) + '%</span>'
+           : '<span class="pill" style="color:var(--green)">Stable · ' + (d>=0?'+':'') + d.toFixed(0) + '%</span>') +
+      '</div><div class="q-sql">' + esc(q.sql) + '</div>' +
+      '<div class="q-m">' +
+        '<div>CPU / exec<b>' + q.cpu + ' ms</b></div>' +
+        '<div>7-day baseline<b>' + q.base + ' ms</b></div>' +
+        '<div>Executions<b>' + fmtN(q.execs) + '</b></div>' +
+        '<div>Logical reads<b>' + fmtN(q.reads) + '</b></div>' +
+      '</div></button>';
+  }).join('');
+
+  var det = '';
+  var q = s.queries.filter(function(x){ return x.fp === openFp; })[0];
+  if (q && q.regressed) det = evidence(q);
+
+  return det +
+    '<div class="card"><div class="card-h"><span class="card-t">Query fingerprints</span>' +
+    '<span class="hint">' + s.queries.length + ' captured · click one for evidence</span></div>' +
+    '<div class="card-b">' + list + '</div></div>';
+}
+
+/* The evidence card — the same picture the launch film recreates. Geometry is
+   honest: y is a linear ms scale, so the drawn step matches the stated percentage. */
+function evidence(q){
+  var W = 880, H = 300, padL = 62, padR = 24, padT = 22, padB = 34;
+  var maxY = Math.ceil(q.cpu * 1.35 / 50) * 50;
+  var y = function(v){ return padT + (1 - v / maxY) * (H - padT - padB); };
+  var n = 16, brk = 9;
+  var pts = [], i;
+  for (i = 0; i < n; i++){
+    var x = padL + i * (W - padL - padR) / (n - 1);
+    var v = i < brk
+      ? q.base * (1 + Math.sin(i * 2.1) * 0.03)
+      : q.base + (q.cpu - q.base) * Math.min(1, (i - brk + 1) / (n - brk));
+    pts.push([x, y(v)]);
+  }
+  var d = pts.map(function(p, k){ return (k ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+  var bx = pts[brk - 1][0];
+  var grid = [0, 0.5, 1].map(function(f){
+    var v = maxY * f;
+    return '<line x1="' + padL + '" y1="' + y(v).toFixed(1) + '" x2="' + (W - padR) + '" y2="' + y(v).toFixed(1) +
+      '" stroke="' + cssVar('--border') + '" stroke-width="1"/>' +
+      '<text x="' + (padL - 10) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="' + cssVar('--text-muted') + '">' + v + ' ms</text>';
+  }).join('');
+
+  return '<div class="det"><div class="det-h">' +
+    '<span class="q-fp">fp/' + q.fp + '</span>' +
+    '<span class="hint">CPU ms per execution · 14-day window</span>' +
+    '<span class="pill" style="color:var(--red);margin-left:auto">Regression · +' +
+      ((q.cpu - q.base) / q.base * 100).toFixed(0) + '% vs 7-day baseline</span>' +
+    '</div>' +
+    '<div class="chart-box"><svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H +
+      '" role="img" aria-label="CPU per execution held near ' + q.base + ' ms, then stepped up to ' +
+      q.cpu + ' ms after the plan hash changed.">' + grid +
+      '<line x1="' + bx.toFixed(1) + '" y1="' + padT + '" x2="' + bx.toFixed(1) + '" y2="' + (H - padB) +
+        '" stroke="' + cssVar('--brand') + '" stroke-width="2" stroke-dasharray="7 7"/>' +
+      '<text x="' + (bx + 10).toFixed(1) + '" y="' + (padT + 14) + '" font-family="IBM Plex Mono, monospace" font-size="11.5" fill="' + cssVar('--brand-ink') + '">plan hash changed · ' + q.planOld + ' &#8594; ' + q.planNew + '</text>' +
+      '<path d="' + d + '" fill="none" stroke="' + cssVar('--brand') + '" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<circle cx="' + pts[n-1][0].toFixed(1) + '" cy="' + pts[n-1][1].toFixed(1) + '" r="6" fill="' + cssVar('--red') + '"/>' +
+      '<text x="' + (pts[n-1][0] - 8).toFixed(1) + '" y="' + (pts[n-1][1] - 14).toFixed(1) + '" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="13" font-weight="500" fill="' + cssVar('--text-primary') + '">' + q.cpu + ' ms</text>' +
+    '</svg></div>' +
+    '<div class="plan">' +
+      '<div class="plan-c plan-old"><h4>Plan before · ' + q.planOld + '</h4><p>' + esc(q.oldOp) + '</p></div>' +
+      '<div class="plan-c plan-new"><h4>Plan after · ' + q.planNew + '</h4><p>' + esc(q.newOp) + '</p></div>' +
+      '<div class="plan-c"><h4>Changed</h4><p>' + esc(q.changedAt) + '</p></div>' +
+      '<div class="plan-c"><h4>Baseline → now</h4><p>' + q.base + ' ms &#8594; ' + q.cpu + ' ms</p></div>' +
+    '</div></div>';
+}
+
+function vTimeline(){
+  var s = srv();
+  var reg = s.queries.filter(function(q){ return q.regressed; })[0];
+  var items = [];
+  if (s.state === 'unreachable'){
+    items.push(['--red','4 min ago','Connection failed','Timed out after 15s. History is still queryable.']);
+    items.push(['--cat-other','3 days ago','Server registered','Added to the estate, read-only credentials verified.']);
+  } else {
+    if (reg){
+      items.push(['--red','' + reg.changedAt, 'Regression detected · fp/' + reg.fp,
+        'CPU per execution moved from ' + reg.base + ' ms to ' + reg.cpu + ' ms against its own rolling baseline.']);
+      items.push(['--brand','' + reg.changedAt, 'Plan hash changed · ' + reg.planOld + ' → ' + reg.planNew,
+        esc(reg.oldOp) + ' → ' + esc(reg.newOp) + '.']);
+    }
+    items.push(['--amber','9 hours ago','Signal waits crossed 25%','Sustained for 8 minutes, then recovered without intervention.']);
+    items.push(['--accent','1 day ago','Snapshot captured','Scheduled capture completed — ' + s.waits.length + ' wait types recorded.']);
+    items.push(['--green','6 days ago','Index recommendation accepted','Parsed from plan XML and marked as applied by a DBA.']);
+    items.push(['--cat-other','' + s.uptimeDays + ' days ago','Instance restarted','Wait statistics reset; baselines rebuilt from this point.']);
+  }
+  return '<div class="card"><div class="card-h"><span class="card-t">Incident timeline — ' + esc(s.name) +
+    '</span></div><div class="card-b"><div class="tl">' +
+    items.map(function(it){
+      return '<div class="tl-i" style="--c:var(' + it[0] + ')"><div class="tl-t">' + esc(it[1]) + '</div>' +
+        '<div class="tl-x">' + esc(it[2]) + '</div><div class="tl-d">' + it[3] + '</div></div>';
+    }).join('') + '</div></div></div>';
+}
+
+function vServers(){
+  var rows = SERVERS.map(function(s){
+    var ok = s.state === 'ok', warn = s.state === 'warn';
+    var col = ok ? '--green' : warn ? '--amber' : '--red';
+    var lbl = ok ? 'Healthy' : warn ? 'CPU pressure' : 'Unreachable';
+    return '<tr><td class="mono">' + esc(s.name) + '</td>' +
+      '<td>' + esc(s.engine) + '</td>' +
+      '<td><span class="pill" style="color:var(' + col + ')">' + lbl + '</span></td>' +
+      '<td class="n">' + (s.state === 'unreachable' ? '—' : fmtN(s.activeReqs)) + '</td>' +
+      '<td class="n">' + (s.state === 'unreachable' ? '—' : s.uptimeDays + ' d') + '</td>' +
+      '<td class="mono" style="color:var(--text-muted)">' + esc(s.view) + '</td></tr>';
+  }).join('');
+  return '<div class="banner banner-warn" style="background:var(--brand-soft);border-color:var(--brand)">' +
+    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>' +
+    '<div><b>Read-only, and nothing is installed</b>' +
+    'OroDb connects with read-only credentials and reads each engine&rsquo;s own diagnostic ' +
+    'views. There is no agent and nothing runs on the database host.</div></div>' +
+    '<div class="card"><div class="card-h"><span class="card-t">Monitored servers</span>' +
+    '<span class="hint">' + SERVERS.length + ' in this fictional estate</span></div>' +
+    '<div class="tbl-wrap"><table><thead><tr>' +
+    '<th scope="col">Server</th><th scope="col">Engine</th><th scope="col">Status</th>' +
+    '<th scope="col">Active</th><th scope="col">Uptime</th><th scope="col">Source view</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+
+/* ── render ──────────────────────────────────────────────────────────────── */
+var TITLES = {dash:'Wait Statistics', queries:'Query Analysis', timeline:'Timeline', servers:'Servers'};
+
+function render(){
+  var s = srv();
+  $('#ttl').textContent = TITLES[view];
+  $('#views').innerHTML =
+    view === 'dash' ? vDash() :
+    view === 'queries' ? vQueries() :
+    view === 'timeline' ? vTimeline() : vServers();
+
+  var d = $('#dot'), st = $('#stat');
+  if (s.state === 'unreachable'){ d.className = 'dot bad'; st.textContent = 'Unreachable'; }
+  else if (s.state === 'warn'){ d.className = 'dot warn'; st.textContent = 'CPU pressure'; }
+  else { d.className = 'dot'; st.textContent = 'Live'; }
+
+  $('#stamp').textContent = 'Synthetic data · rendered ' + new Date().toLocaleTimeString('en-GB');
+
+  var f = $('#flt');
+  if (f){
+    f.addEventListener('input', function(){ filter = f.value.trim().toLowerCase(); render(); f = $('#flt'); if (f){ f.focus(); f.setSelectionRange(f.value.length, f.value.length); } });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('th.s'), function(h){
+    h.addEventListener('click', function(){
+      var k = h.getAttribute('data-k');
+      if (sort.key === k) sort.dir = sort.dir === 'asc' ? 'desc' : 'asc';
+      else { sort.key = k; sort.dir = 'desc'; }
+      render();
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.q'), function(b){
+    b.addEventListener('click', function(){
+      var fp = b.getAttribute('data-fp');
+      openFp = (openFp === fp) ? null : fp;
+      render();
+      if (openFp) { var det = document.querySelector('.det'); if (det) det.scrollIntoView({block:'nearest'}); }
+    });
+  });
+}
+
+function schedule(){
+  if (timer) clearInterval(timer);
+  var ms = parseInt($('#ivl').value, 10);
+  if (ms > 0) timer = setInterval(function(){ tick++; render(); }, ms);
+}
+
+/* ── wiring ──────────────────────────────────────────────────────────────── */
+$('#srv').innerHTML = SERVERS.map(function(s){
+  return '<option value="' + s.id + '">' + esc(s.name) + '</option>';
+}).join('');
+
+$('#srv').addEventListener('change', function(e){ srvId = e.target.value; openFp = null; filter = ''; render(); });
+$('#ivl').addEventListener('change', schedule);
+$('#refresh').addEventListener('click', function(){ tick++; render(); });
+
+Array.prototype.forEach.call(document.querySelectorAll('.navlink'), function(b){
+  b.addEventListener('click', function(){
+    view = b.getAttribute('data-view');
+    Array.prototype.forEach.call(document.querySelectorAll('.navlink'), function(x){ x.removeAttribute('aria-current'); });
+    b.setAttribute('aria-current', 'page');
+    closeNav();
+    render();
+  });
+});
+
+$('#theme').addEventListener('click', function(){
+  var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('orodb-demo-theme', next); } catch(e){}
+  render();  // colours are read from CSS vars at draw time, so charts must repaint
+});
+try {
+  var saved = localStorage.getItem('orodb-demo-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+} catch(e){}
+
+/* mobile drawer */
+var side = $('#side'), scrim = $('#scrim'), burger = $('#burger');
+function openNav(){ side.classList.add('open'); scrim.hidden = false; requestAnimationFrame(function(){ scrim.classList.add('on'); }); burger.setAttribute('aria-expanded','true'); }
+function closeNav(){ side.classList.remove('open'); scrim.classList.remove('on'); burger.setAttribute('aria-expanded','false'); setTimeout(function(){ if(!side.classList.contains('open')) scrim.hidden = true; }, 250); }
+burger.addEventListener('click', function(){ side.classList.contains('open') ? closeNav() : openNav(); });
+scrim.addEventListener('click', closeNav);
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeNav(); });
+
+render();
+schedule();
+})();
+</script>
+</body>
+</html>
