@@ -252,13 +252,29 @@ td.mono{font-family:var(--mono);color:var(--text-primary)}
     <button class="navlink" data-view="queries">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       Query Analysis</button>
+    <button class="navlink" data-view="recs">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/><path d="M17 15l3 3 4-5" transform="translate(-3,0)"/></svg>
+      Index Advisor</button>
     <button class="navlink" data-view="timeline">
       <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       Timeline</button>
-    <div class="navsec">Estate</div>
+    <div class="navsec">History &amp; Evidence</div>
+    <button class="navlink" data-view="snapshots">
+      <svg viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/></svg>
+      Snapshots</button>
+    <button class="navlink" data-view="reports">
+      <svg viewBox="0 0 24 24"><path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h4"/></svg>
+      Incident Bundle</button>
+    <div class="navsec">Operations</div>
+    <button class="navlink" data-view="alerts">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      Alerts &amp; Rules</button>
     <button class="navlink" data-view="servers">
       <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg>
       Servers</button>
+    <button class="navlink" data-view="access">
+      <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+      Access &amp; Audit</button>
   </nav>
 
   <main class="main">
@@ -388,6 +404,92 @@ var SERVERS = [
     state:'unreachable', uptimeDays:0, activeReqs:0, signalPct:0,
     waits:[], queries:[]
   }
+];
+
+/* Index recommendations are parsed out of execution-plan XML in the real product,
+   then carried through a small workflow (new -> assigned -> applied) so two DBAs
+   cannot silently do the same work twice. */
+var RECS = {
+  'prod-sql-01':[
+    {tbl:'dbo.Orders', cols:'CustomerId, Status', incl:'OrderDate, Total', impact:71, reads:184200, status:'applied',  who:'priya.n', note:'Applied in CHG-4471. Fingerprint a3f2c1b8 back to baseline.'},
+    {tbl:'dbo.Shipments', cols:'CarrierId, DispatchedAt', incl:'OrderId', impact:38, reads:52100, status:'assigned', who:'marcus.l', note:'Waiting on the next maintenance window.'},
+    {tbl:'dbo.AuditTrail', cols:'CreatedAt DESC', incl:'', impact:22, reads:41800, status:'new', who:'', note:''}
+  ],
+  'pg-analytics-02':[
+    {tbl:'public.events', cols:'occurred_at, tenant_id', incl:'', impact:84, reads:284000, status:'new', who:'', note:''},
+    {tbl:'public.accounts', cols:'plan_id', incl:'status', impact:17, reads:2840, status:'dismissed', who:'priya.n', note:'Table is small enough that the seq scan is cheaper.'}
+  ],
+  'mysql-app-03':[
+    {tbl:'order_items', cols:'product_id, order_id', incl:'', impact:29, reads:8420, status:'new', who:'', note:''}
+  ],
+  'dr-sql-04':[]
+};
+
+var SNAPS = {
+  'prod-sql-01':[
+    {id:'snap-2291', when:'Today 03:00',      kind:'Scheduled', types:12, total:'3.5 h',  note:''},
+    {id:'snap-2284', when:'Yesterday 03:00',  kind:'Scheduled', types:12, total:'3.1 h',  note:''},
+    {id:'snap-2270', when:'6 days ago 14:22', kind:'Manual',    types:11, total:'2.1 h',  note:'Taken before CHG-4471'},
+    {id:'snap-2255', when:'13 days ago 03:00',kind:'Scheduled', types:11, total:'2.0 h',  note:''}
+  ],
+  'pg-analytics-02':[
+    {id:'snap-2290', when:'Today 03:00',      kind:'Scheduled', types:9, total:'3.3 h', note:''},
+    {id:'snap-2276', when:'2 days ago 09:41', kind:'Manual',    types:9, total:'1.4 h', note:'Before the plan flip'}
+  ],
+  'mysql-app-03':[
+    {id:'snap-2289', when:'Today 03:00',      kind:'Scheduled', types:6, total:'49 min', note:''}
+  ],
+  'dr-sql-04':[]
+};
+
+/* A comparison is the point of keeping snapshots: same server, two moments,
+   what actually moved. */
+var SNAPDIFF = {
+  'prod-sql-01':{a:'snap-2270', b:'snap-2291', rows:[
+    {t:'PAGEIOLATCH_SH', c:'io',   from:2980000, to:4820000},
+    {t:'CXPACKET',       c:'cpu',  from:2510000, to:2610000},
+    {t:'LCK_M_IX',       c:'lock', from:1180000, to:1140000},
+    {t:'WRITELOG',       c:'io',   from:1900000, to:1930000},
+    {t:'RESOURCE_SEMAPHORE', c:'mem', from:402000, to:398000}
+  ]},
+  'pg-analytics-02':{a:'snap-2276', b:'snap-2290', rows:[
+    {t:'CPU',              c:'cpu', from:2140000, to:6410000},
+    {t:'IO:DataFileRead',  c:'io',  from:2210000, to:2180000},
+    {t:'Lock:transactionid',c:'lock',from:910000, to:918000}
+  ]},
+  'mysql-app-03':null, 'dr-sql-04':null
+};
+
+var ALERTS = [
+  {sev:'critical', rule:'Query regression > 50% vs baseline', srv:'PG-ANALYTICS-02', when:'2 days ago', state:'Firing',   detail:'fp/d84b1c07 moved 602 ms → 1,840 ms.'},
+  {sev:'critical', rule:'Query regression > 50% vs baseline', srv:'PROD-SQL-01',     when:'6 days ago', state:'Resolved', detail:'fp/a3f2c1b8 +67%. Resolved after CHG-4471.'},
+  {sev:'warning',  rule:'Signal waits > 25% for 5 min',       srv:'PG-ANALYTICS-02', when:'9 hours ago',state:'Resolved', detail:'Peaked at 31.7%, recovered without intervention.'},
+  {sev:'critical', rule:'Server unreachable for 3 polls',     srv:'DR-SQL-04',       when:'4 min ago',  state:'Firing',   detail:'Connection timed out after 15s.'},
+  {sev:'info',     rule:'New query fingerprint observed',     srv:'MYSQL-APP-03',    when:'1 day ago',  state:'Resolved', detail:'fp/3d97f1a2 first seen.'}
+];
+
+var RULES = [
+  {name:'Query regression > 50% vs baseline', scope:'All servers',      chan:'Email + in-app', on:true},
+  {name:'Signal waits > 25% for 5 min',       scope:'SQL Server only',  chan:'Email',          on:true},
+  {name:'Server unreachable for 3 polls',     scope:'All servers',      chan:'Email + in-app', on:true},
+  {name:'New query fingerprint observed',     scope:'MYSQL-APP-03',     chan:'In-app',         on:false}
+];
+
+var USERS = [
+  {who:'abhishek.j', role:'SuperAdmin',  servers:'All servers, all tenants'},
+  {who:'priya.n',    role:'TenantAdmin', servers:'All 4 in this tenant'},
+  {who:'marcus.l',   role:'DbaAnalyst',  servers:'PROD-SQL-01, PG-ANALYTICS-02'},
+  {who:'dana.k',     role:'ReadOnly',    servers:'PROD-SQL-01'}
+];
+
+var AUDIT = [
+  {when:'Today 03:00',       who:'(scheduler)', act:'SnapshotCaptured',   what:'PROD-SQL-01 — 12 wait types recorded'},
+  {when:'Today 02:14',       who:'marcus.l',    act:'RecommendationAssigned', what:'dbo.Shipments (CarrierId, DispatchedAt) → marcus.l'},
+  {when:'Yesterday 17:08',   who:'priya.n',     act:'RoleChanged',        what:'dana.k set to ReadOnly'},
+  {when:'Yesterday 16:55',   who:'priya.n',     act:'ServerAccessGranted',what:'dana.k granted PROD-SQL-01'},
+  {when:'6 days ago 11:20',  who:'priya.n',     act:'RecommendationApplied', what:'dbo.Orders (CustomerId, Status) — CHG-4471'},
+  {when:'6 days ago 09:02',  who:'marcus.l',    act:'ReportGenerated',    what:'Incident bundle for fp/a3f2c1b8'},
+  {when:'14 days ago 08:31', who:'(retention)', act:'RetentionPurge',     what:'412 snapshot rows older than 90 days removed'}
 ];
 
 /* ── state ───────────────────────────────────────────────────────────────── */
@@ -686,16 +788,187 @@ function vServers(){
     '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
 }
 
+/* ── Index Advisor ───────────────────────────────────────────────────────── */
+var RECSTATE = {
+  applied:  ['--green',  'Applied'],
+  assigned: ['--accent', 'Assigned'],
+  'new':    ['--amber',  'New'],
+  dismissed:['--cat-other','Dismissed']
+};
+function vRecs(){
+  var s = srv();
+  if (s.state === 'unreachable') return unreachable();
+  var list = RECS[s.id] || [];
+  if (!list.length){
+    return '<div class="card"><div class="card-b"><div class="empty">' +
+      '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h6"/></svg>' +
+      '<b>No index recommendations for ' + esc(s.name) + '</b>' +
+      '<small>OroDb only raises one when a captured execution plan asks for it.</small>' +
+      '</div></div></div>';
+  }
+  var rows = list.map(function(r){
+    var st = RECSTATE[r.status];
+    return '<tr><td class="mono">' + esc(r.tbl) + '</td>' +
+      '<td class="mono" style="color:var(--text-primary)">(' + esc(r.cols) + ')' +
+        (r.incl ? '<span style="color:var(--text-muted)"> INCLUDE (' + esc(r.incl) + ')</span>' : '') + '</td>' +
+      '<td><div class="share"><div class="share-tr"><div class="share-fl" style="width:' + r.impact +
+        '%;background:var(--brand)"></div></div><span class="bar-vl">' + r.impact + '%</span></div></td>' +
+      '<td class="n">' + fmtN(r.reads) + '</td>' +
+      '<td><span class="pill" style="color:var(' + st[0] + ')">' + st[1] + '</span></td>' +
+      '<td class="mono">' + (r.who ? esc(r.who) : '<span style="color:var(--text-muted)">&mdash;</span>') + '</td></tr>' +
+      (r.note ? '<tr><td colspan="6" style="padding-top:0;color:var(--text-muted);font-size:12.5px">' +
+        esc(r.note) + '</td></tr>' : '');
+  }).join('');
+  return '<div class="banner banner-warn" style="background:var(--brand-soft);border-color:var(--brand)">' +
+    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>' +
+    '<div><b>Recommendations come from the plans, not from guesswork</b>' +
+    'Each row was parsed out of a captured execution plan. The workflow state stops two ' +
+    'DBAs quietly doing the same piece of work twice &mdash; and records who decided what.</div></div>' +
+    '<div class="card"><div class="card-h"><span class="card-t">Index recommendations</span>' +
+    '<span class="hint">' + list.length + ' open on ' + esc(s.name) + '</span></div>' +
+    '<div class="tbl-wrap"><table><thead><tr>' +
+    '<th scope="col">Table</th><th scope="col">Key / include</th><th scope="col">Est. impact</th>' +
+    '<th scope="col">Reads saved</th><th scope="col">State</th><th scope="col">Owner</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+
+/* ── Snapshots + comparison ──────────────────────────────────────────────── */
+function vSnapshots(){
+  var s = srv();
+  if (s.state === 'unreachable') return unreachable();
+  var list = SNAPS[s.id] || [];
+  if (!list.length) return '<div class="card"><div class="card-b"><div class="empty">' +
+    '<svg viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/></svg>' +
+    '<b>No snapshots captured yet</b><small>The first scheduled capture will appear here.</small></div></div></div>';
+
+  var rows = list.map(function(p){
+    return '<tr><td class="mono">' + esc(p.id) + '</td><td>' + esc(p.when) + '</td>' +
+      '<td><span class="pill" style="color:var(' + (p.kind === 'Manual' ? '--accent' : '--cat-other') + ')">' + p.kind + '</span></td>' +
+      '<td class="n">' + p.types + '</td><td class="n">' + esc(p.total) + '</td>' +
+      '<td style="color:var(--text-muted)">' + esc(p.note || '—') + '</td></tr>';
+  }).join('');
+
+  var d = SNAPDIFF[s.id], diff = '';
+  if (d){
+    var drows = d.rows.slice().sort(function(a,b){
+      return Math.abs(b.to-b.from)/b.from - Math.abs(a.to-a.from)/a.from;
+    }).map(function(r){
+      var pct = (r.to - r.from) / r.from * 100;
+      var up = pct >= 0;
+      var col = Math.abs(pct) < 5 ? '--text-muted' : (up ? '--red' : '--green');
+      return '<tr><td class="mono">' + esc(r.t) + '</td>' +
+        '<td><span class="pill" style="color:' + cssVar(CATS[r.c].v) + '">' + CATS[r.c].label + '</span></td>' +
+        '<td class="n">' + fmtN(r.from) + '</td><td class="n">' + fmtN(r.to) + '</td>' +
+        '<td class="n" style="color:var(' + col + ')">' + (up ? '+' : '') + pct.toFixed(1) + '%</td></tr>';
+    }).join('');
+    diff = '<div class="card" style="margin-top:14px"><div class="card-h">' +
+      '<span class="card-t">Comparison</span>' +
+      '<span class="hint">' + esc(d.a) + ' &#8594; ' + esc(d.b) + ' &middot; sorted by movement</span></div>' +
+      '<div class="tbl-wrap"><table><thead><tr><th scope="col">Wait Type</th><th scope="col">Cat</th>' +
+      '<th scope="col">Before (ms)</th><th scope="col">After (ms)</th><th scope="col">Change</th>' +
+      '</tr></thead><tbody>' + drows + '</tbody></table></div></div>';
+  }
+
+  return '<div class="card"><div class="card-h"><span class="card-t">Snapshot history</span>' +
+    '<span class="hint">' + list.length + ' retained &middot; 90-day retention</span></div>' +
+    '<div class="tbl-wrap"><table><thead><tr><th scope="col">Snapshot</th><th scope="col">Taken</th>' +
+    '<th scope="col">Kind</th><th scope="col">Types</th><th scope="col">Total wait</th><th scope="col">Note</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div></div>' + diff;
+}
+
+/* ── Incident bundle / reports ───────────────────────────────────────────── */
+function vReports(){
+  var s = srv();
+  var reg = s.queries.filter(function(q){ return q.regressed; })[0];
+  var items = [
+    ['Wait statistics at capture time', 'Every non-idle wait type with its category split, not just the top 20.'],
+    ['The regressing fingerprint', reg ? 'fp/' + reg.fp + ' — ' + reg.base + ' ms baseline against ' + reg.cpu + ' ms now.' : 'Whichever fingerprints breached their baseline in the window.'],
+    ['Both execution plans', reg ? 'Plan ' + reg.planOld + ' and plan ' + reg.planNew + ', so the reader can see what changed.' : 'The captured plan on each side of the change.'],
+    ['Plan-change timeline', 'When the hash moved, correlated with the alert and the snapshot either side.'],
+    ['Index recommendations', 'Parsed from the plan XML, with the workflow state and who owns each one.'],
+    ['Server + engine context', s.engine + ', read via ' + s.view + '.']
+  ].map(function(it){
+    return '<div class="plan-c"><h4>' + esc(it[0]) + '</h4><p style="font-family:var(--sans);font-size:13px;color:var(--text-secondary)">' + esc(it[1]) + '</p></div>';
+  }).join('');
+
+  return '<div class="banner banner-warn" style="background:var(--brand-soft);border-color:var(--brand)">' +
+    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>' +
+    '<div><b>One click, and the argument is already assembled</b>' +
+    'The point of a bundle is that the person you escalate to should not have to take your ' +
+    'word for it. OroDb exports the evidence as a PDF, not a screenshot.</div></div>' +
+    '<div class="card"><div class="card-h"><span class="card-t">Incident bundle &mdash; ' + esc(s.name) + '</span>' +
+    '<span class="hint">PDF &middot; generated on demand</span></div>' +
+    '<div class="plan" style="padding:16px">' + items + '</div>' +
+    '<div class="card-b" style="border-top:1px solid var(--border)">' +
+    '<button class="btn btn-act" id="genBundle">Generate bundle</button> ' +
+    '<span class="hint" id="genMsg" style="margin-left:10px"></span></div></div>';
+}
+
+/* ── Alerts & rules ──────────────────────────────────────────────────────── */
+function vAlerts(){
+  var SEV = {critical:'--red', warning:'--amber', info:'--accent'};
+  var a = ALERTS.map(function(x){
+    return '<tr><td><span class="pill" style="color:var(' + SEV[x.sev] + ')">' + x.sev + '</span></td>' +
+      '<td>' + esc(x.rule) + '</td><td class="mono">' + esc(x.srv) + '</td>' +
+      '<td style="color:var(--text-muted)">' + esc(x.when) + '</td>' +
+      '<td><span class="pill" style="color:var(' + (x.state === 'Firing' ? '--red' : '--green') + ')">' + x.state + '</span></td>' +
+      '</tr><tr><td colspan="5" style="padding-top:0;color:var(--text-muted);font-size:12.5px">' + esc(x.detail) + '</td></tr>';
+  }).join('');
+  var r = RULES.map(function(x){
+    return '<tr><td>' + esc(x.name) + '</td><td class="mono">' + esc(x.scope) + '</td>' +
+      '<td>' + esc(x.chan) + '</td>' +
+      '<td><span class="pill" style="color:var(' + (x.on ? '--green' : '--cat-other') + ')">' +
+      (x.on ? 'Enabled' : 'Disabled') + '</span></td></tr>';
+  }).join('');
+  return '<div class="card"><div class="card-h"><span class="card-t">Recent alerts</span>' +
+    '<span class="hint">estate-wide</span></div><div class="tbl-wrap"><table><thead><tr>' +
+    '<th scope="col">Severity</th><th scope="col">Rule</th><th scope="col">Server</th>' +
+    '<th scope="col">When</th><th scope="col">State</th></tr></thead><tbody>' + a + '</tbody></table></div></div>' +
+    '<div class="card" style="margin-top:14px"><div class="card-h"><span class="card-t">Alert rules</span>' +
+    '<span class="hint">' + RULES.filter(function(x){return x.on;}).length + ' of ' + RULES.length + ' enabled</span></div>' +
+    '<div class="tbl-wrap"><table><thead><tr><th scope="col">Rule</th><th scope="col">Scope</th>' +
+    '<th scope="col">Channel</th><th scope="col">State</th></tr></thead><tbody>' + r + '</tbody></table></div></div>';
+}
+
+/* ── Access & audit ──────────────────────────────────────────────────────── */
+function vAccess(){
+  var ROLE = {SuperAdmin:'--red', TenantAdmin:'--brand', DbaAnalyst:'--accent', ReadOnly:'--cat-other'};
+  var u = USERS.map(function(x){
+    return '<tr><td class="mono">' + esc(x.who) + '</td>' +
+      '<td><span class="pill" style="color:var(' + ROLE[x.role] + ')">' + x.role + '</span></td>' +
+      '<td style="color:var(--text-secondary)">' + esc(x.servers) + '</td></tr>';
+  }).join('');
+  var al = AUDIT.map(function(x){
+    return '<tr><td style="color:var(--text-muted)">' + esc(x.when) + '</td>' +
+      '<td class="mono">' + esc(x.who) + '</td>' +
+      '<td class="mono" style="color:var(--text-primary)">' + esc(x.act) + '</td>' +
+      '<td>' + esc(x.what) + '</td></tr>';
+  }).join('');
+  return '<div class="banner banner-warn" style="background:var(--brand-soft);border-color:var(--brand)">' +
+    '<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>' +
+    '<div><b>A role says what you are; a grant says what you may see</b>' +
+    'Being an analyst does not give you a server. Every screen that takes a server id checks ' +
+    'the grant as well as the role, and background actors write to the same audit trail as people.</div></div>' +
+    '<div class="card"><div class="card-h"><span class="card-t">Users &amp; server access</span></div>' +
+    '<div class="tbl-wrap"><table><thead><tr><th scope="col">User</th><th scope="col">Role</th>' +
+    '<th scope="col">Servers they may see</th></tr></thead><tbody>' + u + '</tbody></table></div></div>' +
+    '<div class="card" style="margin-top:14px"><div class="card-h"><span class="card-t">Audit log</span>' +
+    '<span class="hint">every mutation, including automated ones</span></div>' +
+    '<div class="tbl-wrap"><table><thead><tr><th scope="col">When</th><th scope="col">Actor</th>' +
+    '<th scope="col">Action</th><th scope="col">Detail</th></tr></thead><tbody>' + al + '</tbody></table></div></div>';
+}
+
 /* ── render ──────────────────────────────────────────────────────────────── */
-var TITLES = {dash:'Wait Statistics', queries:'Query Analysis', timeline:'Timeline', servers:'Servers'};
+var TITLES = {dash:'Wait Statistics', queries:'Query Analysis', recs:'Index Advisor',
+  timeline:'Timeline', snapshots:'Snapshots', reports:'Incident Bundle',
+  alerts:'Alerts & Rules', servers:'Servers', access:'Access & Audit'};
+var VIEWS = {dash:vDash, queries:vQueries, recs:vRecs, timeline:vTimeline,
+  snapshots:vSnapshots, reports:vReports, alerts:vAlerts, servers:vServers, access:vAccess};
 
 function render(){
   var s = srv();
   $('#ttl').textContent = TITLES[view];
-  $('#views').innerHTML =
-    view === 'dash' ? vDash() :
-    view === 'queries' ? vQueries() :
-    view === 'timeline' ? vTimeline() : vServers();
+  $('#views').innerHTML = (VIEWS[view] || vDash)();
 
   var d = $('#dot'), st = $('#stat');
   if (s.state === 'unreachable'){ d.className = 'dot bad'; st.textContent = 'Unreachable'; }
@@ -716,6 +989,20 @@ function render(){
       render();
     });
   });
+  // A button that looks like it works has to work. In the demo there is no PDF to
+  // produce, so it says so plainly rather than pretending to download one.
+  var gb = $('#genBundle');
+  if (gb){
+    gb.addEventListener('click', function(){
+      var m = $('#genMsg');
+      gb.disabled = true; gb.textContent = 'Generating…';
+      setTimeout(function(){
+        gb.disabled = false; gb.textContent = 'Generate bundle';
+        if (m) m.textContent = 'In the product this returns a PDF. The demo stops here — there is no real server behind it.';
+      }, 900);
+    });
+  }
+
   Array.prototype.forEach.call(document.querySelectorAll('.q'), function(b){
     b.addEventListener('click', function(){
       var fp = b.getAttribute('data-fp');
