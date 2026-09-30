@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Page not found — OroDb</title>
+<meta name="description" content="That page does not exist on orodb.com. Head back to the homepage or open the OroDb app."/>
+<meta name="robots" content="noindex, follow"/>
+<link rel="canonical" href="https://orodb.com/404.html"/>
+<meta property="og:title" content="Page not found — OroDb"/>
+<meta property="og:description" content="That page does not exist on orodb.com."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://orodb.com/404.html"/>
+<meta property="og:image" content="https://orodb.com/assets/brand/og-light.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="theme-color" content="#F8FAFC"/>
+<link rel="icon" href="/favicon.ico" sizes="any"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<link rel="manifest" href="/site.webmanifest"/>
+<style>
+@font-face{font-family:'IBM Plex Sans';src:url('assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('assets/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Instrument Serif';src:url('assets/fonts/instrument-serif-latin-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+
+/* Same tokens as index.html so a 404 does not look like a different product. */
+:root{
+  --bg:#F8FAFC; --card:#FFFFFF; --ink:#111827; --muted:#475569; --faint:#64748B;
+  --line:#E2E8F0; --line2:#CBD5E1;
+  --gold:#C6922E; --gold-deep:#8A6516;
+  --action:#2563EB; --action-deep:#1D4ED8;
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --serif:'Instrument Serif',Georgia,serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--sans);
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:32px 20px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+main{max-width:520px; width:100%; text-align:center}
+.logo{display:inline-flex; align-items:center; gap:10px; margin-bottom:34px; text-decoration:none}
+.logo img{height:26px; width:auto; display:block}
+.code{
+  font-family:var(--mono); font-size:13px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--gold-deep); margin-bottom:14px;
+}
+h1{font-size:clamp(26px,5vw,34px); font-weight:600; letter-spacing:-.01em; margin-bottom:12px}
+h1 em{font-family:var(--serif); font-style:italic; color:var(--gold-deep); font-weight:400}
+p{color:var(--muted); font-size:15.5px; margin-bottom:28px}
+.actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-size:14.5px; font-weight:600; text-decoration:none;
+  padding:11px 22px; border-radius:8px; border:1px solid transparent;
+  transition:background .15s, border-color .15s, color .15s;
+}
+.btn-primary{background:var(--action); color:#fff}
+.btn-primary:hover{background:var(--action-deep)}
+.btn-ghost{border-color:var(--line2); color:var(--ink)}
+.btn-ghost:hover{border-color:var(--action); color:var(--action)}
+.btn:focus-visible{outline:2px solid var(--action); outline-offset:2px}
+.hint{margin-top:30px; font-family:var(--mono); font-size:11.5px; color:var(--faint)}
+.hint a{color:var(--faint)}
+@media (max-width:420px){ .actions{flex-direction:column} .btn{width:100%} }
+</style>
+</head>
+<body>
+<main>
+  <a href="/" class="logo" aria-label="OroDb home">
+    <img src="assets/brand/logo/orodb-logo-ink.svg" alt="OroDb" width="110" height="26"/>
+  </a>
+
+  <div class="code">Error 404</div>
+  <h1>This page <em>doesn't exist</em></h1>
+  <!-- Say what to do next. A 404 that only says "404" makes the reader do the work. -->
+  <p>The link may be out of date, or the address may have a typo in it. Nothing is broken on your side.</p>
+
+  <div class="actions">
+    <a class="btn btn-primary" href="/">Back to the homepage</a>
+    <a class="btn btn-ghost" href="https://orodb-test.azurewebsites.net">Open the app</a>
+  </div>
+
+  <p class="hint">Still stuck? <a href="mailto:hello@orodb.com">hello@orodb.com</a></p>
+</main>
+</body>
+</html>
