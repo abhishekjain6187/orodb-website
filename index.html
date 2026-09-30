@@ -74,6 +74,9 @@
   --action:#2563EB; --action-deep:#1D4ED8;
   --green:#15803D;
 
+  /* translucent chrome — must follow the theme, see nav{} */
+  --nav-bg:rgba(248,250,252,.85); --pill-bg:rgba(255,255,255,.5);
+
   --serif:'Instrument Serif',Georgia,serif;
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
@@ -97,7 +100,7 @@ h1,h2{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;color:var(-
 .lede{font-size:clamp(16px,1.35vw,18px);line-height:1.7;color:var(--muted);max-width:56ch}
 
 /* ── nav ── */
-nav{position:fixed;top:0;left:0;right:0;z-index:200;height:66px;display:flex;align-items:center;background:rgba(248,250,252,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid transparent;transition:border-color .3s,box-shadow .3s}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:66px;display:flex;align-items:center;background:var(--nav-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid transparent;transition:border-color .3s,box-shadow .3s}
 nav.scrolled{border-bottom-color:var(--line);box-shadow:0 8px 30px -18px rgba(17,24,39,.25)}
 .nav-in{width:100%;max-width:var(--w);margin:0 auto;padding:0 clamp(20px,4vw,48px);display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:.01em;color:var(--ink)}
@@ -186,7 +189,7 @@ section{padding:clamp(80px,9vw,128px) 0}
 .night{border-bottom:1px solid var(--line)}
 .night-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
 .night-col{padding:clamp(28px,3.5vw,44px)}
-.night-col.without{background:#F1F5F9}
+.night-col.without{background:var(--sand)}
 .night-col.with{background:var(--card)}
 .night-lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:26px;display:inline-block;padding:5px 12px}
 .night-col.without .night-lbl{color:var(--muted);border:1px solid var(--line2)}
@@ -239,7 +242,7 @@ section{padding:clamp(80px,9vw,128px) 0}
 .log-head{padding:11px 18px;border-bottom:1px solid var(--line2);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between;gap:10px;background:var(--sand)}
 .log-body{padding:20px 22px}
 .ll{display:flex;gap:10px;min-height:22px}
-.lp{color:var(--gold-deep)} .lc{color:#5E6E8A} .lo{color:var(--faint)}
+.lp{color:var(--gold-deep)} .lc{color:var(--muted)} .lo{color:var(--faint)}
 .lok{color:var(--green)} .lw{color:#B8862B} .le{color:var(--terra)}
 .lgap{height:11px}
 
@@ -259,7 +262,7 @@ section{padding:clamp(80px,9vw,128px) 0}
 .fit{background:var(--bg2);border-top:1px solid var(--line)}
 .fit-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line)}
 .fit-col{background:var(--card);padding:clamp(28px,3.5vw,42px)}
-.fit-col.no{background:#F1F5F9}
+.fit-col.no{background:var(--sand)}
 .fit-col h3{font-family:var(--serif);font-size:24px;font-weight:500;margin-bottom:22px;color:var(--ink)}
 .fit-col h3 em{font-style:italic;color:var(--gold-deep)}
 .fit-col.no h3 em{color:var(--faint)}
@@ -279,7 +282,7 @@ section{padding:clamp(80px,9vw,128px) 0}
 .srow span{font-size:13.5px;color:var(--muted);line-height:1.6}
 .srow code{font-family:var(--mono);font-size:12px;color:var(--gold-deep)}
 .vers{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px}
-.vpill{font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;padding:7px 14px;border:1px solid var(--line2);color:var(--muted);background:rgba(255,255,255,.5)}
+.vpill{font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;padding:7px 14px;border:1px solid var(--line2);color:var(--muted);background:var(--pill-bg)}
 .vpill.on{border-color:var(--gold-line);color:var(--gold-deep);background:var(--card)}
 /* preview: verified against a live instance, but without production mileage.
    Dashed edge so it reads as "not the same commitment" at a glance. */
@@ -330,6 +333,65 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 .foot-links a:hover{color:var(--gold-deep)}
 .foot-copy{font-family:var(--mono);font-size:10.5px}
 
+
+/* ── Dark theme ───────────────────────────────────────────────────────────
+   Values mirror the application's Oro Enterprise dark palette so the site and
+   the product cannot drift into two different dark modes.
+
+   --gold-deep matters here: on the light theme it is #8A6516, a dark gold used
+   as TEXT for contrast. Left alone it would be near-invisible on a dark ground,
+   so it flips to the bright gold, which is 7.9:1 there. */
+:root[data-theme="dark"]{
+  --bg:#0B1220; --bg2:#111827; --sand:#111827; --card:#111827; --ledger:#182233;
+  --ink:#F8FAFC; --muted:#A7B2C3; --faint:#8494A8;
+  --line:#273449; --line2:#3A4A63;
+  --gold:#D4A72C; --gold-deep:#D4A72C; --gold-bright:#E0B84A;
+  --gold-soft:rgba(212,167,44,.14); --gold-line:rgba(212,167,44,.42);
+  --terra:#F87171; --terra-deep:#FCA5A5; --terra-soft:rgba(248,113,113,.12);
+  --action:#60A5FA; --action-deep:#93C5FD;
+  --green:#4ADE80;
+  --nav-bg:rgba(11,18,32,.85); --pill-bg:rgba(24,34,51,.6);
+
+}
+/* Follow the operating system until the visitor makes a choice of their own. */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1220; --bg2:#111827; --sand:#111827; --card:#111827; --ledger:#182233;
+    --ink:#F8FAFC; --muted:#A7B2C3; --faint:#8494A8;
+    --line:#273449; --line2:#3A4A63;
+    --gold:#D4A72C; --gold-deep:#D4A72C; --gold-bright:#E0B84A;
+    --gold-soft:rgba(212,167,44,.14); --gold-line:rgba(212,167,44,.42);
+    --terra:#F87171; --terra-deep:#FCA5A5; --terra-soft:rgba(248,113,113,.12);
+    --action:#60A5FA; --action-deep:#93C5FD;
+    --green:#4ADE80;
+ 
+    --nav-bg:rgba(11,18,32,.85); --pill-bg:rgba(24,34,51,.6);
+ }
+}
+/* The wordmark is artwork: the ink lockup would vanish on a dark ground, so the
+   white one is shown instead. Scoped to .logo so the rule cannot lose a
+   specificity fight with `.logo-img`. */
+.logo .logo-dark{display:none}
+:root[data-theme="dark"] .logo .logo-light{display:none}
+:root[data-theme="dark"] .logo .logo-dark{display:block}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .logo .logo-light{display:none}
+  :root:not([data-theme="light"]) .logo .logo-dark{display:block}
+}
+/* Toggle */
+.theme-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
+  border:1px solid var(--line2);border-radius:8px;background:transparent;color:var(--muted);
+  cursor:pointer;flex:none;transition:color .18s,border-color .18s,background .18s}
+.theme-btn:hover{color:var(--ink);border-color:var(--gold);background:var(--gold-soft)}
+.theme-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+.theme-btn .i-sun{display:none}
+:root[data-theme="dark"] .theme-btn .i-sun{display:block}
+:root[data-theme="dark"] .theme-btn .i-moon{display:none}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .theme-btn .i-sun{display:block}
+  :root:not([data-theme="light"]) .theme-btn .i-moon{display:none}
+}
+
 /* ── launch film ── */
 .film{background:var(--bg2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:clamp(72px,8vw,118px) 0}
 .film-in{max-width:1080px;margin:0 auto;padding:0 clamp(20px,4vw,48px);text-align:center}
@@ -372,6 +434,14 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
   .close-cta .btn{width:100%;justify-content:center}
 }
 </style>
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('orodb-site-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) { /* private mode: fall through to the OS preference */ }
+  })();
+</script>
 </head>
 <body>
 <nav id="nav">
@@ -379,7 +449,8 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
     <a href="/" class="logo" aria-label="OroDb home">
         <!-- Brand lockup, used as shipped. alt="" because the visible "OroDb"
              label beside it already names the link. -->
-        <img src="assets/brand/logo/orodb-logo-ink.svg" alt="" width="96" height="24" class="logo-img"/>
+        <img src="assets/brand/logo/orodb-logo-ink.svg"   alt="" width="96" height="24" class="logo-img logo-light"/>
+        <img src="assets/brand/logo/orodb-logo-white.svg" alt="" width="96" height="24" class="logo-img logo-dark"/>
         <span class="logo-txt" aria-hidden="true">OroDb</span><span class="v">v1.0</span>
     </a>
     <div class="nav-links">
@@ -390,6 +461,11 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
       <a href="#security">Security</a>
       <a href="demo.html" class="nav-cta">Open demo</a>
     </div>
+      <button class="theme-btn" id="themeBtn" type="button"
+              aria-label="Switch between light and dark theme" title="Light / dark">
+        <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
@@ -443,7 +519,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
             <line x1="0" y1="240" x2="960" y2="240"/>
           </g>
           <!-- y labels -->
-          <g font-family="IBM Plex Mono, monospace" font-size="10" fill="rgba(71,85,105,0.65)">
+          <g font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--faint)">
             <text x="8" y="56">240 ms</text>
             <text x="8" y="116">180 ms</text>
             <text x="8" y="176">120 ms</text>
@@ -462,7 +538,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
           <path class="chart-line chart-anim" pathLength="1" d="M0,186 L46,184 L92,187 L138,183 L184,186 L230,182 L276,185 L322,183 L368,186 L414,184 L460,187 L506,183 L540,185 L575,182 L600,183 L622,172 L650,148 L678,124 L706,108 L734,96 L762,100 L790,88 L818,82 L846,86 L874,76 L902,80 L930,72 L958,75"/>
           <!-- last point -->
           <g class="chart-late">
-            <circle cx="958" cy="75" r="4" fill="#FFFFFF" stroke="#C6922E" stroke-width="2"/>
+            <circle cx="958" cy="75" r="4" fill="var(--card)" stroke="var(--gold)" stroke-width="2"/>
             <text x="946" y="66" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="#111827">207 ms</text>
           </g>
         </svg>
@@ -854,6 +930,30 @@ document.querySelectorAll('.reveal').forEach(function(el){ obs.observe(el); });
     document.body.style.overflow = open ? 'hidden' : '';
   });
   menu.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', close); });
+})();
+
+// theme toggle
+(function(){
+  var btn = document.getElementById('themeBtn');
+  if (!btn) return;
+  var root = document.documentElement;
+  function current(){
+    var set = root.getAttribute('data-theme');
+    if (set) return set;
+    // No explicit choice yet, so report what the OS is actually giving them.
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark' : 'light';
+  }
+  function apply(t){
+    root.setAttribute('data-theme', t);
+    btn.setAttribute('aria-label',
+      t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    try { localStorage.setItem('orodb-site-theme', t); } catch (e) {}
+  }
+  apply(current());
+  btn.addEventListener('click', function(){
+    apply(current() === 'dark' ? 'light' : 'dark');
+  });
 })();
 </script>
 </body>

@@ -30,6 +30,32 @@
   --line:#E2E8F0; --line2:#CBD5E1;
   --gold:#C6922E; --gold-deep:#8A6516;
   --action:#2563EB; --action-deep:#1D4ED8;
+}
+/* Same dark values as index.html. --gold-deep is a TEXT gold on light and would be
+   near-invisible on a dark ground, so it flips to the bright gold. No toggle here:
+   a 404 simply follows whatever the visitor already chose on the site. */
+:root[data-theme="dark"]{
+    --bg:#0B1220; --card:#111827; --ink:#F8FAFC; --muted:#A7B2C3; --faint:#8494A8;
+    --line:#273449; --line2:#3A4A63;
+    --gold:#D4A72C; --gold-deep:#D4A72C;
+    --action:#60A5FA; --action-deep:#93C5FD;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1220; --card:#111827; --ink:#F8FAFC; --muted:#A7B2C3; --faint:#8494A8;
+    --line:#273449; --line2:#3A4A63;
+    --gold:#D4A72C; --gold-deep:#D4A72C;
+    --action:#60A5FA; --action-deep:#93C5FD;
+  }
+  :root:not([data-theme="light"]) .logo-light{display:none}
+  :root:not([data-theme="light"]) .logo-dark{display:block}
+}
+.logo-dark{display:none}
+:root[data-theme="dark"] .logo-light{display:none}
+:root[data-theme="dark"] .logo-dark{display:block}
+:root[data-theme="light"] .logo-light{display:block}
+:root[data-theme="light"] .logo-dark{display:none}
+:root{
   --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,monospace;
   --serif:'Instrument Serif',Georgia,serif;
@@ -66,11 +92,20 @@ p{color:var(--muted); font-size:15.5px; margin-bottom:28px}
 .hint a{color:var(--faint)}
 @media (max-width:420px){ .actions{flex-direction:column} .btn{width:100%} }
 </style>
+<script>
+  (function(){
+    try {
+      var t = localStorage.getItem('orodb-site-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 <main>
   <a href="/" class="logo" aria-label="OroDb home">
-    <img src="assets/brand/logo/orodb-logo-ink.svg" alt="OroDb" width="110" height="26"/>
+    <img class="logo-light" src="assets/brand/logo/orodb-logo-ink.svg" alt="OroDb" width="110" height="26"/>
+      <img class="logo-dark" src="assets/brand/logo/orodb-logo-white.svg" alt="OroDb" width="110" height="26"/>
   </a>
 
   <div class="code">Error 404</div>
