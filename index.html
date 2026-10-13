@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>OroDb — Database Performance Investigation · SQL Server, PostgreSQL, MySQL, Oracle</title>
+<title>OroDb: Database Performance Investigation for SQL Server, PostgreSQL, MySQL and Oracle</title>
 <meta name="description" content="OroDb turns SQL Server telemetry into an investigation: query fingerprinting, regression detection against rolling baselines, and one-click incident bundles. PostgreSQL, MySQL and Oracle support in preview."/>
-<meta property="og:title" content="OroDb — Database Performance Investigation"/>
+<meta property="og:title" content="OroDb: Database Performance Investigation"/>
 <meta property="og:description" content="Monitoring tells you it's slow. OroDb tells you why. SQL Server, with PostgreSQL, MySQL and Oracle in preview."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://orodb.com/"/>
@@ -105,7 +105,6 @@ nav.scrolled{border-bottom-color:var(--line);box-shadow:0 8px 30px -18px rgba(17
 .nav-in{width:100%;max-width:var(--w);margin:0 auto;padding:0 clamp(20px,4vw,48px);display:flex;align-items:center;justify-content:space-between}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--serif);font-size:22px;font-weight:600;letter-spacing:.01em;color:var(--ink)}
 .logo svg{display:block}
-.logo .v{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.14em;color:var(--faint);margin-left:2px;transform:translateY(2px)}
 .nav-links{display:flex;align-items:center;gap:34px}
 .nav-links a{font-size:13.5px;font-weight:500;text-decoration:none;color:var(--muted);transition:color .2s}
 .nav-links a:hover{color:var(--gold-deep)}
@@ -126,8 +125,6 @@ nav.scrolled{border-bottom-color:var(--line);box-shadow:0 8px 30px -18px rgba(17
 .btn:hover{transform:translateY(-1px)}
 .logo-img{height:22px;width:auto;display:block}
 .logo-txt{display:none}
-.btn .arr{font-family:var(--serif);font-style:italic;transition:transform .2s}
-.btn:hover .arr{transform:translateX(3px)}
 .btn-terra{background:var(--action);color:#FFFFFF;box-shadow:0 10px 24px -12px rgba(37,99,235,.45)}
 .btn-terra:hover{background:var(--action-deep)}
 .btn-ghost{border-color:var(--line2);color:var(--ink)}
@@ -170,6 +167,19 @@ nav.scrolled{border-bottom-color:var(--line);box-shadow:0 8px 30px -18px rgba(17
   .ev-flag::before{animation:none}
   .reveal{opacity:1 !important;transform:none !important;transition:none !important}
   html{scroll-behavior:auto}
+}
+
+/* A control that moves 1px under the pointer confirms the press landed.
+   transform only, so it stays on the compositor. */
+.btn:active,button:active,.skip-link:active{transform:translateY(1px)}
+
+/* The targeted block above covers this page's own animations by name. This is
+   the catch-all, so a future addition is still held still by default. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important
+  }
 }
 
 /* ── fact strip ── */
@@ -256,7 +266,7 @@ section{padding:clamp(80px,9vw,128px) 0}
 .role>p{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:16px}
 .role ul{list-style:none}
 .role li{font-size:13px;color:var(--muted);padding:7px 0;border-top:1px solid var(--line);display:flex;gap:9px;align-items:baseline}
-.role li::before{content:'—';color:var(--gold);flex-shrink:0}
+.role li::before{content:'-';color:var(--gold);flex-shrink:0}
 
 /* ── fit ── */
 .fit{background:var(--bg2);border-top:1px solid var(--line)}
@@ -301,7 +311,7 @@ section{padding:clamp(80px,9vw,128px) 0}
 .eng li{display:flex;gap:10px;align-items:flex-start;color:var(--muted)}
 .eng li::before{font-family:var(--mono);font-size:12px;line-height:1.5;flex-shrink:0}
 .eng li.y::before{content:'✓';color:var(--green)}
-.eng li.n::before{content:'—';color:var(--faint)}
+.eng li.n::before{content:'-';color:var(--faint)}
 .eng li.w::before{content:'!';color:var(--terra)}
 @media(max-width:900px){.eng-grid{grid-template-columns:1fr}
   .eng{padding:22px 18px 20px}
@@ -433,6 +443,44 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
   .hero-cta .btn{width:100%;justify-content:center}
   .close-cta .btn{width:100%;justify-content:center}
 }
+
+/* ── Interface quality layer ──────────────────────────────────────────────
+   Findings from an audit against the Web Interface Guidelines. Additive only:
+   no component's colour, size or layout changes. Everything is self-hosted;
+   this file loads nothing from outside the site. */
+
+/* Native scrollbars, form widgets and the <select> popup follow the theme
+   instead of being painted from the OS light palette. */
+:root{color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* First focusable element on the page, hidden until focused. */
+.skip-link{
+  position:absolute;top:0;left:0;z-index:400;
+  padding:12px 20px;background:var(--gold-deep,#8A6516);color:#fff;
+  font-family:var(--sans);font-size:14px;font-weight:600;text-decoration:none;
+  transform:translateY(-110%);transition:transform .14s
+}
+.skip-link:focus-visible{transform:translateY(0);outline:2px solid var(--ink);outline-offset:2px}
+
+/* Headings keep an orphan word off its own line; body copy evens its last line. */
+h1,h2,h3{text-wrap:balance}
+p,li{text-wrap:pretty}
+
+/* Drops the 300ms double-tap-to-zoom delay in front of every control, and sets
+   the tap flash deliberately rather than taking the OS default blue box. */
+a,button,summary,label,[role="button"]{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:rgba(138,101,22,.18)
+}
+
+/* Figures in a column line up, so two values of the same magnitude look it. */
+table,.n,.mono,.num,.kpi-value{font-variant-numeric:tabular-nums}
+
+/* Nothing pushes the page sideways; long identifiers wrap instead. */
+body{overflow-x:hidden}
+code,.mono{overflow-wrap:break-word}
 </style>
 <script>
   (function(){
@@ -444,6 +492,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 <nav id="nav">
   <div class="nav-in">
     <a href="/" class="logo" aria-label="OroDb home">
@@ -451,7 +500,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
              label beside it already names the link. -->
         <img src="assets/brand/logo/orodb-logo-ink.svg"   alt="" width="96" height="24" class="logo-img logo-light"/>
         <img src="assets/brand/logo/orodb-logo-white.svg" alt="" width="96" height="24" class="logo-img logo-dark"/>
-        <span class="logo-txt" aria-hidden="true">OroDb</span><span class="v">v1.0</span>
+        <span class="logo-txt" aria-hidden="true">OroDb</span>
     </a>
     <div class="nav-links">
       <a href="#bundle">Incident bundles</a>
@@ -482,24 +531,26 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
   <a href="mailto:hello@orodb.com">Contact</a>
 </div>
 
+<main id="main">
+
 <!-- ═══ HERO ═══ -->
 <header class="hero">
   <div class="hero-in">
     <p class="eyebrow">Database performance investigation</p>
     <h1>Monitoring tells you it&rsquo;s slow.<br><em class="oro">OroDb tells you why.</em></h1>
-    <p class="lede">OroDb fingerprints every query, watches each one against its own rolling baseline, and correlates plan changes, wait stats, and alerts on a single timeline &mdash; then packages the evidence into a one-click incident bundle when it&rsquo;s time to escalate.</p>
+    <p class="lede">OroDb fingerprints every query, watches each one against its own rolling baseline, and correlates plan changes, wait stats, and alerts on a single timeline, then packages the evidence into a one-click incident bundle when it&rsquo;s time to escalate.</p>
     <div class="hero-cta">
-      <a href="demo.html" class="btn btn-terra">Open demo <span class="arr">&rarr;</span></a>
+      <a href="demo.html" class="btn btn-terra">Open demo</a>
       <a href="#film" class="btn btn-ghost">Watch the 25s film</a>
     </div>
-    <p class="hero-note"><b>Read-only access</b> &nbsp;&middot;&nbsp; no agents &nbsp;&middot;&nbsp; nothing installs on your database host</p>
+    <p class="hero-note"><b>Read-only access.</b> No agents, and nothing installs on your database host.</p>
   </div>
 
   <!-- signature: regression evidence chart -->
   <div class="evidence">
     <div class="ev-card">
       <div class="ev-head">
-        <span class="ev-title"><b>fp/a3f2c1b8</b> &nbsp;&middot;&nbsp; SELECT &hellip; FROM Orders WHERE CustomerId = @P &nbsp;&middot;&nbsp; CPU ms per execution</span>
+        <span class="ev-title"><b>fp/a3f2c1b8</b> &nbsp;&middot;&nbsp; SELECT &hellip; FROM Orders WHERE CustomerId = @P</span>
         <span class="ev-flag">Regression &middot; +67% vs 7-day baseline</span>
       </div>
       <div class="ev-body">
@@ -556,8 +607,8 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
       <span>sys.dm_os_wait_stats</span>
       <span>Plan shape hashing</span>
       <span>VIEW SERVER STATE only</span>
-      <span>SQL Server 2014 &ndash; 2022 &middot; Azure SQL</span>
-      <span>PostgreSQL &middot; MySQL &middot; Oracle in preview</span>
+      <span>SQL Server 2014-2022 &middot; Azure SQL</span>
+      <span>PostgreSQL, MySQL and Oracle in preview</span>
     </div>
   </div>
 </header>
@@ -569,8 +620,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
      so link unfurls in Slack and Teams show the same frame. -->
 <section class="film" id="film">
   <div class="film-in">
-    <p class="eyebrow">In twenty-five seconds</p>
-    <h2>Watch OroDb catch a <em class="oro">regression</em>.</h2>
+    <h2>Watch OroDb catch a regression.</h2>
     <p class="film-lede">A query&rsquo;s cost drifts away from its own rolling baseline. OroDb marks the plan change that caused it, and flags the regression with a number you can take to a change-approval meeting.</p>
     <div class="film-frame reveal">
       <video controls preload="metadata" playsinline width="1920" height="1080"
@@ -580,7 +630,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
           <a href="assets/video/orodb-launch.mp4" download>Download the MP4 (2.1&nbsp;MB)</a> instead.</p>
       </video>
     </div>
-    <p class="film-note">25 seconds &nbsp;&middot;&nbsp; no audio &nbsp;&middot;&nbsp; 1080p</p>
+    <p class="film-note">25 seconds, no audio, 1080p</p>
   </div>
 </section>
 
@@ -588,7 +638,6 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <section class="night">
   <div class="container">
     <div class="sec-head reveal">
-      <p class="eyebrow">Why it exists</p>
       <h2>Built for the page that arrives at <em class="oro">2:47 a.m.</em></h2>
       <p class="lede">Every DBA knows the sequence. The application is slow, the evidence is scattered across six DMV queries, and the clock is running. OroDb collapses that sequence into minutes.</p>
     </div>
@@ -599,16 +648,16 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
         <div class="tstep"><span class="tt">2:55</span><span class="tx">Query <b>sys.dm_os_wait_stats</b> by hand. Numbers, but no baseline to compare against.</span></div>
         <div class="tstep"><span class="tt">3:10</span><span class="tx">Hunt for the offending query. Pull plans, guess whether they changed. Screenshot everything.</span></div>
         <div class="tstep"><span class="tt">3:32</span><span class="tx">Assemble wait stats, plan XMLs, config, and alert history from six places into a support ticket.</span></div>
-        <div class="tstep"><span class="tt">3:40</span><span class="tx">Escalate &mdash; and hope you captured the right window.</span></div>
+        <div class="tstep"><span class="tt">3:40</span><span class="tx">Escalate, and hope you captured the right window.</span></div>
         <p class="tsum">Fifty minutes gathering evidence. Zero minutes fixing.</p>
       </div>
       <div class="night-col with reveal d1">
         <span class="night-lbl">With OroDb</span>
-        <div class="tstep"><span class="tt">2:47</span><span class="tx"><b>Alerted by OroDb</b> &mdash; CPU pressure rule fired. Signal wait 34.2%, above your 25% threshold.</span></div>
+        <div class="tstep"><span class="tt">2:47</span><span class="tx"><b>Alerted by OroDb.</b> CPU pressure rule fired. Signal wait 34.2%, above your 25% threshold.</span></div>
         <div class="tstep"><span class="tt">2:49</span><span class="tx">Open the timeline. One query regressed <b>+67% against its own baseline</b>, and its plan hash changed at 13:10.</span></div>
-        <div class="tstep"><span class="tt">2:52</span><span class="tx">Review the plan in the browser. Cause identified &mdash; and the fix has an index recommendation already classified.</span></div>
+        <div class="tstep"><span class="tt">2:52</span><span class="tx">Review the plan in the browser. Cause identified, and the fix has an index recommendation already classified.</span></div>
         <div class="tstep"><span class="tt">2:54</span><span class="tx">Export the <b>incident bundle</b>: wait stats, plans, config, alert history, and a plain-English summary in one ZIP.</span></div>
-        <div class="tstep"><span class="tt">2:56</span><span class="tx">Escalate with the complete picture &mdash; or fix it yourself and watch the baseline recover.</span></div>
+        <div class="tstep"><span class="tt">2:56</span><span class="tx">Escalate with the complete picture, or fix it yourself and watch the baseline recover.</span></div>
         <p class="tsum">Nine minutes to root cause, evidence in hand.</p>
       </div>
     </div>
@@ -622,8 +671,8 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
       <div>
         <div class="sec-head reveal" style="margin-bottom:0">
           <p class="eyebrow">Incident bundles</p>
-          <h2>One click. <em class="oro">Everything</em> support needs.</h2>
-          <p class="lede">When things are on fire, nobody has time to pull wait stats, plan XMLs, alert history, and server configuration from six different places. OroDb packages all of it &mdash; plus a plain-English narrative for the non-DBAs on the thread &mdash; into a single, vendor-escalation-ready ZIP.</p>
+          <h2>One click. Everything support needs.</h2>
+          <p class="lede">When things are on fire, nobody has time to pull wait stats, plan XMLs, alert history, and server configuration from six different places. OroDb packages all of it, plus a plain-English narrative for the non-DBAs on the thread, into a single, vendor-escalation-ready ZIP.</p>
         </div>
         <div class="claim reveal d1">
           What used to take forty-five minutes to assemble for a vendor ticket is now one button.
@@ -641,9 +690,9 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
           <div class="frow"><span class="fname">01_wait_stats.csv</span><span class="fdesc">Top 30 wait types with all metrics</span><span class="fsize">8 kb</span></div>
           <div class="frow"><span class="fname">02_active_waits.csv</span><span class="fdesc">Sessions waiting at capture time</span><span class="fsize">3 kb</span></div>
           <div class="frow"><span class="fname">03_top_queries.txt</span><span class="fdesc">Top 20 queries by resource usage</span><span class="fsize">12 kb</span></div>
-          <div class="frow"><span class="fname">04_plans/query_01.html</span><span class="fdesc">Execution plan &mdash; opens in any browser</span><span class="fsize">84 kb</span></div>
-          <div class="frow"><span class="fname">04_plans/query_02.html</span><span class="fdesc">Execution plan &mdash; opens in any browser</span><span class="fsize">71 kb</span></div>
-          <div class="frow"><span class="fname">05_index_recommendations.sql</span><span class="fdesc">CREATE INDEX scripts &mdash; review before running</span><span class="fsize">6 kb</span></div>
+          <div class="frow"><span class="fname">04_plans/query_01.html</span><span class="fdesc">Execution plan (opens in any browser)</span><span class="fsize">84 kb</span></div>
+          <div class="frow"><span class="fname">04_plans/query_02.html</span><span class="fdesc">Execution plan (opens in any browser)</span><span class="fsize">71 kb</span></div>
+          <div class="frow"><span class="fname">05_index_recommendations.sql</span><span class="fdesc">CREATE INDEX scripts (review before running)</span><span class="fsize">6 kb</span></div>
           <div class="frow"><span class="fname">06_alert_history.csv</span><span class="fdesc">Recent alerts for this server</span><span class="fsize">2 kb</span></div>
           <div class="frow"><span class="fname">07_server_config.txt</span><span class="fdesc">sys.configurations snapshot</span><span class="fsize">2 kb</span></div>
           <div class="frow"><span class="fname">08_regressions.txt</span><span class="fdesc">Queries above baseline, with details</span><span class="fsize">3 kb</span></div>
@@ -657,17 +706,16 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <section class="caps" id="capabilities">
   <div class="container">
     <div class="sec-head reveal">
-      <p class="eyebrow">Capabilities</p>
-      <h2>Every signal a DBA reads, <em class="oro">in one place</em></h2>
-      <p class="lede">From raw wait types to plain-English business impact &mdash; each capability is built on the DMVs you already trust, with a structured workflow to act on what they say.</p>
+      <h2>Every signal a DBA reads, in one place</h2>
+      <p class="lede">From raw wait types to plain-English business impact. Each capability is built on the DMVs you already trust, with a structured workflow to act on what they say.</p>
     </div>
     <div class="caps-grid">
-      <article class="cap reveal"><span class="src">sys.dm_exec_query_stats + SHA-256</span><h3>Query fingerprinting</h3><p>Literals stripped, whitespace normalized, structure hashed. Two parameterized queries doing the same logical work share one fingerprint &mdash; which is what makes honest trend tracking possible across captures.</p></article>
-      <article class="cap reveal d1"><span class="src">sys.dm_os_wait_stats &middot; per-engine equivalents</span><h3>Wait stats engine</h3><p>Real-time and snapshot-based analysis, categorized into CPU, I/O, Memory, Lock, Network, and Other &mdash; the same six categories on every supported engine, so blocking reads as blocking whether it came from a SQL Server <code>LCK_</code> wait, a PostgreSQL lock event, or an Oracle enqueue. On SQL Server, the signal-versus-resource breakdown tells you at a glance whether you have CPU pressure or data pressure.</p></article>
-      <article class="cap reveal d2"><span class="src">Plan shape hash comparison</span><h3>Plan regression detection</h3><p>OroDb hashes the structural shape of execution plans across snapshots. When a plan changes and performance drops at the same time, it&rsquo;s flagged &mdash; before your users notice.</p></article>
-      <article class="cap reveal d3"><span class="src">sys.dm_db_missing_index_details</span><h3>Classified index recommendations</h3><p>Not a raw DMV dump. Each recommendation is classified as HighConfidence, ReviewRequired, ConflictingDuplicate, or WriteHeavyRisk &mdash; so your team works the right ones first.</p></article>
+      <article class="cap reveal"><span class="src">sys.dm_exec_query_stats + SHA-256</span><h3>Query fingerprinting</h3><p>Literals stripped, whitespace normalized, structure hashed. Two parameterized queries doing the same logical work share one fingerprint, which is what makes honest trend tracking possible across captures.</p></article>
+      <article class="cap reveal d1"><span class="src">sys.dm_os_wait_stats &middot; per-engine equivalents</span><h3>Wait stats engine</h3><p>Real-time and snapshot-based analysis, categorized into CPU, I/O, Memory, Lock, Network, and Other: the same six categories on every supported engine, so blocking reads as blocking whether it came from a SQL Server <code>LCK_</code> wait, a PostgreSQL lock event, or an Oracle enqueue. On SQL Server, the signal-versus-resource breakdown tells you at a glance whether you have CPU pressure or data pressure.</p></article>
+      <article class="cap reveal d2"><span class="src">Plan shape hash comparison</span><h3>Plan regression detection</h3><p>OroDb hashes the structural shape of execution plans across snapshots. When a plan changes and performance drops at the same time, it&rsquo;s flagged before your users notice.</p></article>
+      <article class="cap reveal d3"><span class="src">sys.dm_db_missing_index_details</span><h3>Classified index recommendations</h3><p>Not a raw DMV dump. Each recommendation is classified as HighConfidence, ReviewRequired, ConflictingDuplicate, or WriteHeavyRisk, so your team works the right ones first.</p></article>
       <article class="cap reveal d4"><span class="src">Per-server rule evaluation</span><h3>Configurable alerts</h3><p>Define thresholds per server: signal wait percentage, IO wait share, specific wait types. Rules are evaluated on every snapshot with a 30-minute deduplication window; critical alerts send email automatically.</p></article>
-      <article class="cap reveal d5"><span class="src">Correlated event stream</span><h3>Incident timeline</h3><p>Alerts, regressions, plan changes, and new fingerprints on one chronological view. Zoom from 1 to 30 days to see exactly what changed and when &mdash; the post-mortem view, available before the post-mortem.</p></article>
+      <article class="cap reveal d5"><span class="src">Correlated event stream</span><h3>Incident timeline</h3><p>Alerts, regressions, plan changes, and new fingerprints on one chronological view. Zoom from 1 to 30 days to see exactly what changed and when. It is the post-mortem view, available before the post-mortem.</p></article>
     </div>
   </div>
 </section>
@@ -676,9 +724,8 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <section class="engines" id="engines">
   <div class="container">
     <div class="sec-head reveal">
-      <p class="eyebrow">Beyond SQL Server</p>
-      <h2>PostgreSQL, MySQL and Oracle &mdash; <em class="oro">in preview</em></h2>
-      <p class="lede">The same investigation model, reading each engine&rsquo;s own native telemetry rather than pretending every database is SQL Server. Each is verified against a live instance. <b>SQL Server remains the engine with production mileage</b> &mdash; the three below are new, and we&rsquo;d rather tell you that than let you find out.</p>
+      <h2>PostgreSQL, MySQL and Oracle, now in preview</h2>
+      <p class="lede">The same investigation model, reading each engine&rsquo;s own native telemetry rather than pretending every database is SQL Server. Each is verified against a live instance. <b>SQL Server remains the engine with production mileage.</b> The three below are new, and we&rsquo;d rather tell you that than let you find out.</p>
     </div>
     <div class="eng-grid">
 
@@ -686,9 +733,9 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
         <div class="eng-top"><h3>PostgreSQL</h3><span class="ver">verified on 17.10</span></div>
         <span class="src">pg_stat_activity &middot; pg_stat_statements</span>
         <ul>
-          <li class="y">Live wait analysis and active sessions &mdash; no extension, no restart, works on a stock install</li>
+          <li class="y">Live wait analysis and active sessions: no extension, no restart, works on a stock install</li>
           <li class="y">Lock, I/O, client and on-CPU backends classified natively</li>
-          <li class="w">Waits are a point-in-time sample, not totals since restart &mdash; PostgreSQL has no cumulative wait store, and the dashboard says so instead of implying otherwise</li>
+          <li class="w">Waits are a point-in-time sample, not totals since restart. PostgreSQL has no cumulative wait store, and the dashboard says so instead of implying otherwise</li>
           <li class="w">Top queries need the <code>pg_stat_statements</code> extension, which requires a restart to enable</li>
           <li class="n">No execution plans or missing-index recommendations</li>
         </ul>
@@ -711,7 +758,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
         <span class="src">v$system_event &middot; v$session &middot; v$sql</span>
         <ul>
           <li class="y">Cumulative wait events by class, active sessions, and top SQL by elapsed time</li>
-          <li class="y"><b>No Diagnostics Pack licence required.</b> OroDb reads core RDBMS views only &mdash; never ASH or AWR, which are separately licensed and audited</li>
+          <li class="y"><b>No Diagnostics Pack licence required.</b> OroDb reads core RDBMS views only, never ASH or AWR, which are separately licensed and audited</li>
           <li class="y">Full statement text captured, not the truncated 1,000-character form</li>
           <li class="w">Needs <code>SELECT</code> on the V_$ views (or <code>SELECT_CATALOG_ROLE</code>)</li>
           <li class="n">No execution plans or missing-index recommendations</li>
@@ -728,7 +775,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
   <div class="container">
     <div class="sec-head reveal">
       <p class="eyebrow">How it works</p>
-      <h2>Connected in minutes. <em class="oro">Learning</em> from the first snapshot.</h2>
+      <h2>Connected in minutes. Learning from the first snapshot.</h2>
     </div>
     <div class="how-grid">
       <div>
@@ -748,14 +795,14 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
             <div class="lgap"></div>
             <div class="ll"><span class="lo">Capturing wait stats (sys.dm_os_wait_stats)&hellip;</span></div>
             <div class="ll"><span class="lok">&#x2713; 312 wait types captured</span></div>
-            <div class="ll"><span class="lw">&#x26A0; Signal wait 34.2% &mdash; above 25% threshold</span></div>
+            <div class="ll"><span class="lw">&#x26A0; Signal wait 34.2%, above 25% threshold</span></div>
             <div class="lgap"></div>
             <div class="ll"><span class="lo">Fingerprinting top 20 queries&hellip;</span></div>
-            <div class="ll"><span class="le">&#x2717; Regression: fp/a3f2c1b8 &mdash; CpuMs +67% vs baseline</span></div>
+            <div class="ll"><span class="le">&#x2717; Regression: fp/a3f2c1b8, CpuMs +67% vs baseline</span></div>
             <div class="ll"><span class="lw">&#x26A0; Plan hash changed: 9e4a &rarr; 7c8f</span></div>
             <div class="ll"><span class="lw">&#x26A0; AlertRule fired: CpuPressure &middot; SignalPercent 34.2 &gt; 25</span></div>
             <div class="lgap"></div>
-            <div class="ll"><span class="lok">&#x2713; Snapshot saved (snap/d9147cbe) &mdash; 1.4 s</span></div>
+            <div class="ll"><span class="lok">&#x2713; Snapshot saved (snap/d9147cbe) in 1.4 s</span></div>
           </div>
         </div>
       </div>
@@ -767,9 +814,8 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <section class="roles">
   <div class="container">
     <div class="sec-head reveal">
-      <p class="eyebrow">Access control</p>
-      <h2>The right view for <em class="oro">every person</em> on the thread</h2>
-      <p class="lede">OroDb adapts to the reader. DBAs get execution plans and DMV data; executives get health status in plain English &mdash; no SQL required, and no way to touch what they shouldn&rsquo;t.</p>
+      <h2>The right view for every person on the thread</h2>
+      <p class="lede">OroDb adapts to the reader. DBAs get execution plans and DMV data; executives get health status in plain English, with no SQL required and no way to touch what they shouldn&rsquo;t.</p>
     </div>
     <div class="roles-grid">
       <div class="role reveal"><span class="tag">SuperAdmin</span><h3>Platform admin</h3><p>Full cross-tenant visibility and system configuration.</p><ul><li>All tenant access</li><li>User management</li><li>Audit log access</li><li>System configuration</li></ul></div>
@@ -784,17 +830,16 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <section class="fit">
   <div class="container">
     <div class="sec-head reveal">
-      <p class="eyebrow">Honest fit</p>
-      <h2>Who this is for &mdash; <em class="oro">and who it isn&rsquo;t</em></h2>
-      <p class="lede">We&rsquo;d rather you know upfront. OroDb is a focused database investigation tool &mdash; deepest on SQL Server, newly in preview on PostgreSQL, MySQL and Oracle &mdash; not a full APM platform.</p>
+      <h2>Who this is for, and who it isn&rsquo;t</h2>
+      <p class="lede">We&rsquo;d rather you know upfront. OroDb is a focused database investigation tool (deepest on SQL Server, newly in preview on PostgreSQL, MySQL and Oracle), not a full APM platform.</p>
     </div>
     <div class="fit-grid">
       <div class="fit-col yes reveal">
         <h3>This is for you <em>if&hellip;</em></h3>
         <ul>
-          <li>You manage 1&ndash;50 SQL Server instances and want performance history that actually means something</li>
+          <li>You manage 1-50 SQL Server instances and want performance history that actually means something</li>
           <li>You get paged about slow queries and lose time gathering evidence before you can act</li>
-          <li>You want a structured approval workflow for index changes &mdash; not ad-hoc scripts</li>
+          <li>You want a structured approval workflow for index changes, not ad-hoc scripts</li>
           <li>You escalate to Microsoft support and need a clean, complete data package</li>
           <li>You want your manager to understand database health without reading DMVs</li>
           <li>You&rsquo;re on SQL Server 2014 or newer, on-prem, VM, or Azure SQL</li>
@@ -804,11 +849,11 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
       <div class="fit-col no reveal d1">
         <h3>This isn&rsquo;t for you <em>if&hellip;</em></h3>
         <ul>
-          <li>You need full APM across mixed stacks &mdash; Node, Python, Java &mdash; a general-purpose APM suite fits better</li>
-          <li>You need PostgreSQL, MySQL or Oracle as your <em>primary</em> engine today &mdash; those are in preview, and SQL Server is the one with production mileage</li>
-          <li>You need sub-second metric streaming &mdash; snapshots are periodic, not continuous</li>
+          <li>You need full APM across mixed stacks (Node, Python, Java); a general-purpose APM suite fits better</li>
+          <li>You need PostgreSQL, MySQL or Oracle as your <em>primary</em> engine today: those are in preview, and SQL Server is the one with production mileage</li>
+          <li>You need sub-second metric streaming; snapshots are periodic, not continuous</li>
           <li>You want indexes applied automatically with no human review in the loop</li>
-          <li>You need RDS SQL Server today &mdash; it&rsquo;s on the roadmap</li>
+          <li>You need RDS SQL Server today; it&rsquo;s on the roadmap</li>
         </ul>
       </div>
     </div>
@@ -820,8 +865,8 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
   <div class="container">
     <div class="sec-head reveal">
       <p class="eyebrow">Security &amp; compatibility</p>
-      <h2>Built to be trusted with <em class="oro">production</em></h2>
-      <p class="lede">OroDb reads from standard DMVs available since SQL Server 2014, and from each other engine&rsquo;s own catalog views. No extended events, no trace flags, no schema changes on the databases it watches &mdash; and on Oracle, nothing that requires a Diagnostics Pack licence.</p>
+      <h2>Built to be trusted with production</h2>
+      <p class="lede">OroDb reads from standard DMVs available since SQL Server 2014, and from each other engine&rsquo;s own catalog views. No extended events, no trace flags, no schema changes on the databases it watches, and on Oracle nothing that requires a Diagnostics Pack licence.</p>
     </div>
     <div class="secure-grid">
       <div class="reveal">
@@ -831,7 +876,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
         </div>
         <div class="srow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 8s2.5-4.5 6.5-4.5S14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.3"/></svg>
-          <div><b>Read-only, by design</b><span>SQL Server needs only <code>VIEW SERVER STATE</code>; PostgreSQL <code>pg_monitor</code>; MySQL <code>SELECT</code> on performance_schema plus <code>PROCESS</code>; Oracle <code>SELECT</code> on the V_$ views. It never writes to a monitored database &mdash; ever.</span></div>
+          <div><b>Read-only, by design</b><span>SQL Server needs only <code>VIEW SERVER STATE</code>; PostgreSQL <code>pg_monitor</code>; MySQL <code>SELECT</code> on performance_schema plus <code>PROCESS</code>; Oracle <code>SELECT</code> on the V_$ views. It never writes to a monitored database. Not ever.</span></div>
         </div>
         <div class="srow">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M6 8l1.6 1.6L10.5 6.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -856,7 +901,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
           <span class="vpill on">SQL Server 2022</span>
           <span class="vpill on">Azure SQL Database *</span>
           <span class="vpill on">Azure SQL Managed Instance</span>
-          <span class="vpill prev">PostgreSQL 13&ndash;17 &middot; preview</span>
+          <span class="vpill prev">PostgreSQL 13-17 &middot; preview</span>
           <span class="vpill prev">MySQL 8.x &middot; preview</span>
           <span class="vpill prev">Oracle 12c+ &middot; preview</span>
           <span class="vpill">RDS SQL Server &middot; roadmap</span>
@@ -871,16 +916,18 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 <!-- ═══ CLOSING CTA ═══ -->
 <section class="close">
   <div class="close-in">
-    <p class="oro-def">oro &middot; <em>Spanish for gold &mdash; what your telemetry becomes</em></p>
+    <p class="oro-def">oro &middot; <em>Spanish for gold, what your telemetry becomes</em></p>
     <h2>See what your server has been <em class="oro">trying to tell you.</em></h2>
-    <p>Walk through the demo first &mdash; it runs in your browser on a fictional estate, with a regression already waiting to be found. When you want it pointed at your own servers, get in touch.</p>
+    <p>Walk through the demo first. It runs in your browser on a fictional estate, with a regression already waiting to be found. When you want it pointed at your own servers, get in touch.</p>
     <div class="close-cta">
-      <a href="demo.html" class="btn btn-terra">Open demo <span class="arr">&rarr;</span></a>
+      <a href="demo.html" class="btn btn-terra">Open demo</a>
       <a href="mailto:hello@orodb.com" class="btn btn-ghost">Talk to us</a>
     </div>
-    <p class="close-note">Read-only access &nbsp;&middot;&nbsp; no agents &nbsp;&middot;&nbsp; no schema changes on monitored databases</p>
+    <p class="close-note">Read-only access, no agents, and no schema changes on monitored databases.</p>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="foot-in">

@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>OroDb — Interactive Demo</title>
+<title>OroDb: Interactive Demo</title>
 <meta name="description" content="An interactive demo of OroDb: live wait-statistics analysis, query fingerprinting and regression detection. Synthetic data, no sign-up, nothing to install."/>
 <meta name="robots" content="index, follow"/>
 <link rel="canonical" href="https://orodb.com/demo.html"/>
 
-<meta property="og:title" content="OroDb — Interactive Demo"/>
+<meta property="og:title" content="OroDb: Interactive Demo"/>
 <meta property="og:description" content="Click through a working OroDb dashboard. Synthetic data, no sign-up required."/>
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://orodb.com/demo.html"/>
@@ -224,13 +224,55 @@ td.mono{font-family:var(--mono);color:var(--text-primary)}
   *{animation:none!important;transition:none!important}
   html{scroll-behavior:auto}
 }
+
+/* ── Interface quality layer ──────────────────────────────────────────────
+   Findings from an audit against the Web Interface Guidelines. Additive only:
+   no component's colour, size or layout changes. Everything is self-hosted;
+   this file loads nothing from outside the site. */
+
+/* Native scrollbars, form widgets and the <select> popup follow the theme
+   instead of being painted from the OS light palette. */
+:root{color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+
+/* First focusable element on the page, hidden until focused. */
+.skip-link{
+  position:absolute;top:0;left:0;z-index:400;
+  padding:12px 20px;background:var(--gold-deep,#8A6516);color:#fff;
+  font-family:var(--sans);font-size:14px;font-weight:600;text-decoration:none;
+  transform:translateY(-110%);transition:transform .14s
+}
+.skip-link:focus-visible{transform:translateY(0);outline:2px solid var(--ink);outline-offset:2px}
+
+/* Headings keep an orphan word off its own line; body copy evens its last line. */
+h1,h2,h3{text-wrap:balance}
+p,li{text-wrap:pretty}
+
+/* Drops the 300ms double-tap-to-zoom delay in front of every control, and sets
+   the tap flash deliberately rather than taking the OS default blue box. */
+a,button,summary,label,[role="button"]{
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:rgba(138,101,22,.18)
+}
+
+/* Figures in a column line up, so two values of the same magnitude look it. */
+table,.n,.mono,.num,.kpi-value{font-variant-numeric:tabular-nums}
+
+/* Nothing pushes the page sideways; long identifiers wrap instead. */
+body{overflow-x:hidden}
+code,.mono{overflow-wrap:break-word}
+
+/* Press feedback, matching the app. */
+.btn:active,button:active,.skip-link:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to main content</a>
 
 <div class="demo-bar">
   <b>Demo</b>
-  <span>Synthetic data on a fictional estate — nothing here touches a real database.
+  <span>Synthetic data on a fictional estate. Nothing here touches a real database.
     <a href="index.html">Back to orodb.com</a></span>
 </div>
 
@@ -277,7 +319,7 @@ td.mono{font-family:var(--mono);color:var(--text-primary)}
       Access &amp; Audit</button>
   </nav>
 
-  <main class="main">
+  <main class="main" id="main">
     <div class="toolbar">
       <button class="btn burger" id="burger" aria-label="Open navigation" aria-expanded="false" aria-controls="side">
         <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -483,11 +525,11 @@ var USERS = [
 ];
 
 var AUDIT = [
-  {when:'Today 03:00',       who:'(scheduler)', act:'SnapshotCaptured',   what:'PROD-SQL-01 — 12 wait types recorded'},
+  {when:'Today 03:00',       who:'(scheduler)', act:'SnapshotCaptured',   what:'PROD-SQL-01: 12 wait types recorded'},
   {when:'Today 02:14',       who:'marcus.l',    act:'RecommendationAssigned', what:'dbo.Shipments (CarrierId, DispatchedAt) → marcus.l'},
   {when:'Yesterday 17:08',   who:'priya.n',     act:'RoleChanged',        what:'dana.k set to ReadOnly'},
   {when:'Yesterday 16:55',   who:'priya.n',     act:'ServerAccessGranted',what:'dana.k granted PROD-SQL-01'},
-  {when:'6 days ago 11:20',  who:'priya.n',     act:'RecommendationApplied', what:'dbo.Orders (CustomerId, Status) — CHG-4471'},
+  {when:'6 days ago 11:20',  who:'priya.n',     act:'RecommendationApplied', what:'dbo.Orders (CustomerId, Status), CHG-4471'},
   {when:'6 days ago 09:02',  who:'marcus.l',    act:'ReportGenerated',    what:'Incident bundle for fp/a3f2c1b8'},
   {when:'14 days ago 08:31', who:'(retention)', act:'RetentionPurge',     what:'412 snapshot rows older than 90 days removed'}
 ];
@@ -537,7 +579,7 @@ function unreachable(){
     '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>' +
     '<div><b>Cannot reach ' + esc(srv().name) + '</b>' +
     'The last connection attempt timed out. OroDb keeps serving the history it already ' +
-    'captured, and retries on the next poll — it never blocks the rest of the estate on ' +
+    'captured and retries on the next poll. It never blocks the rest of the estate on ' +
     'one unreachable host.</div></div>' +
     '<div class="card"><div class="card-b"><div class="empty">' +
     '<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/></svg>' +
@@ -584,7 +626,7 @@ function vDash(){
 
   var warn = sig > 25 ? '<div class="banner banner-warn">' +
     '<svg viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>' +
-    '<div><b>CPU pressure — signal waits at ' + sig.toFixed(1) + '%</b>' +
+    '<div><b>CPU pressure: signal waits at ' + sig.toFixed(1) + '%</b>' +
     'Above roughly 25%, tasks are spending more time waiting for a scheduler than for a ' +
     'resource. That points at CPU, not storage.</div></div>' : '';
 
@@ -647,7 +689,7 @@ function vDash(){
         '<span class="hint">' + esc(s.view) + '</span></div>' +
         '<div class="card-b"><div class="bars">' + bars + '</div></div></div>' +
     '</div>' +
-    '<div class="card"><div class="card-h"><span class="card-t">Top wait types — detail</span>' +
+    '<div class="card"><div class="card-h"><span class="card-t">Top wait types, in detail</span>' +
       '<input class="inp" id="flt" type="search" placeholder="Filter…" value="' + esc(filter) +
       '" aria-label="Filter wait types"/>' +
       '<span class="badge">' + rows.length + ' of ' + ws.length + '</span></div>' + tbl + '</div>';
@@ -751,11 +793,11 @@ function vTimeline(){
         esc(reg.oldOp) + ' → ' + esc(reg.newOp) + '.']);
     }
     items.push(['--amber','9 hours ago','Signal waits crossed 25%','Sustained for 8 minutes, then recovered without intervention.']);
-    items.push(['--accent','1 day ago','Snapshot captured','Scheduled capture completed — ' + s.waits.length + ' wait types recorded.']);
+    items.push(['--accent','1 day ago','Snapshot captured','Scheduled capture completed: ' + s.waits.length + ' wait types recorded.']);
     items.push(['--green','6 days ago','Index recommendation accepted','Parsed from plan XML and marked as applied by a DBA.']);
     items.push(['--cat-other','' + s.uptimeDays + ' days ago','Instance restarted','Wait statistics reset; baselines rebuilt from this point.']);
   }
-  return '<div class="card"><div class="card-h"><span class="card-t">Incident timeline — ' + esc(s.name) +
+  return '<div class="card"><div class="card-h"><span class="card-t">Incident timeline: ' + esc(s.name) +
     '</span></div><div class="card-b"><div class="tl">' +
     items.map(function(it){
       return '<div class="tl-i" style="--c:var(' + it[0] + ')"><div class="tl-t">' + esc(it[1]) + '</div>' +
@@ -823,7 +865,7 @@ function vRecs(){
     '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>' +
     '<div><b>Recommendations come from the plans, not from guesswork</b>' +
     'Each row was parsed out of a captured execution plan. The workflow state stops two ' +
-    'DBAs quietly doing the same piece of work twice &mdash; and records who decided what.</div></div>' +
+    'DBAs quietly doing the same piece of work twice, and records who decided what.</div></div>' +
     '<div class="card"><div class="card-h"><span class="card-t">Index recommendations</span>' +
     '<span class="hint">' + list.length + ' open on ' + esc(s.name) + '</span></div>' +
     '<div class="tbl-wrap"><table><thead><tr>' +
@@ -882,7 +924,7 @@ function vReports(){
   var reg = s.queries.filter(function(q){ return q.regressed; })[0];
   var items = [
     ['Wait statistics at capture time', 'Every non-idle wait type with its category split, not just the top 20.'],
-    ['The regressing fingerprint', reg ? 'fp/' + reg.fp + ' — ' + reg.base + ' ms baseline against ' + reg.cpu + ' ms now.' : 'Whichever fingerprints breached their baseline in the window.'],
+    ['The regressing fingerprint', reg ? 'fp/' + reg.fp + ': ' + reg.base + ' ms baseline against ' + reg.cpu + ' ms now.' : 'Whichever fingerprints breached their baseline in the window.'],
     ['Both execution plans', reg ? 'Plan ' + reg.planOld + ' and plan ' + reg.planNew + ', so the reader can see what changed.' : 'The captured plan on each side of the change.'],
     ['Plan-change timeline', 'When the hash moved, correlated with the alert and the snapshot either side.'],
     ['Index recommendations', 'Parsed from the plan XML, with the workflow state and who owns each one.'],
@@ -896,7 +938,7 @@ function vReports(){
     '<div><b>One click, and the argument is already assembled</b>' +
     'The point of a bundle is that the person you escalate to should not have to take your ' +
     'word for it. OroDb exports the evidence as a PDF, not a screenshot.</div></div>' +
-    '<div class="card"><div class="card-h"><span class="card-t">Incident bundle &mdash; ' + esc(s.name) + '</span>' +
+    '<div class="card"><div class="card-h"><span class="card-t">Incident bundle: ' + esc(s.name) + '</span>' +
     '<span class="hint">PDF &middot; generated on demand</span></div>' +
     '<div class="plan" style="padding:16px">' + items + '</div>' +
     '<div class="card-b" style="border-top:1px solid var(--border)">' +
@@ -998,7 +1040,7 @@ function render(){
       gb.disabled = true; gb.textContent = 'Generating…';
       setTimeout(function(){
         gb.disabled = false; gb.textContent = 'Generate bundle';
-        if (m) m.textContent = 'In the product this returns a PDF. The demo stops here — there is no real server behind it.';
+        if (m) m.textContent = 'In the product this returns a PDF. The demo stops here. There is no real server behind it.';
       }, 900);
     });
   }
