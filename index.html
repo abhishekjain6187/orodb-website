@@ -96,7 +96,7 @@ a{color:inherit}
 /* ── type roles ── */
 .eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-deep);display:flex;align-items:center;gap:12px}
 .eyebrow::before{content:'';width:26px;height:1px;background:linear-gradient(90deg,#8A6516,#D4A72C)}
-h1,h2{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+h1,h2{font-family:var(--serif);font-weight:500;letter-spacing:0;color:var(--ink)}
 .lede{font-size:clamp(16px,1.35vw,18px);line-height:1.7;color:var(--muted);max-width:56ch}
 
 /* ── nav ── */
@@ -117,7 +117,7 @@ nav.scrolled{border-bottom-color:var(--line);box-shadow:0 8px 30px -18px rgba(17
 .burger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
 .mobile-menu{position:fixed;inset:0;z-index:150;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
 .mobile-menu.open{opacity:1;pointer-events:all}
-.mobile-menu a{font-family:var(--serif);font-size:clamp(26px,7vw,40px);color:var(--ink);text-decoration:none;padding:16px 40px;opacity:.9}
+.mobile-menu a{font-family:var(--serif);font-size:clamp(23px,5.6vw,33px);color:var(--ink);text-decoration:none;padding:16px 40px;opacity:.9}
 .mobile-menu a:hover{color:var(--gold-deep)}
 
 /* ── buttons ── */
@@ -137,7 +137,7 @@ nav.scrolled{border-bottom-color:var(--line);box-shadow:0 8px 30px -18px rgba(17
   radial-gradient(ellipse 700px 460px at 4% 108%, rgba(220,38,38,.06), transparent 60%);pointer-events:none}
 .hero-in{position:relative;z-index:1;max-width:var(--w);margin:0 auto;padding:0 clamp(20px,4vw,48px)}
 .hero .eyebrow{margin-bottom:30px}
-.hero h1{font-size:clamp(42px,5.6vw,74px);line-height:1.06;max-width:16ch;margin-bottom:26px}
+.hero h1{font-size:clamp(36px,4.3vw,58px);line-height:1.14;max-width:30ch;margin-bottom:26px}
 .hero h1 em{font-style:italic;font-weight:500}
 .hero .lede{margin-bottom:38px}
 .hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
@@ -192,7 +192,7 @@ nav.scrolled{border-bottom-color:var(--line);box-shadow:0 8px 30px -18px rgba(17
 section{padding:clamp(80px,9vw,128px) 0}
 .sec-head{margin-bottom:clamp(44px,5vw,68px)}
 .sec-head .eyebrow{margin-bottom:22px}
-.sec-head h2{font-size:clamp(34px,3.8vw,54px);line-height:1.1;max-width:20ch;margin-bottom:20px}
+.sec-head h2{font-size:clamp(27px,2.9vw,42px);line-height:1.18;max-width:24ch;margin-bottom:20px}
 .sec-head h2 em{font-style:italic}
 
 /* ── 2:47 a.m. narrative ── */
@@ -328,7 +328,7 @@ section{padding:clamp(80px,9vw,128px) 0}
 .oro-def::before,.oro-def::after{content:'';width:26px;height:1px;background:linear-gradient(90deg,transparent,#C6922E)}
 .oro-def::after{background:linear-gradient(90deg,#C6922E,transparent)}
 .oro-def em{font-family:var(--serif);font-style:italic;text-transform:none;letter-spacing:0;font-size:13px;color:var(--muted)}
-.close h2{font-size:clamp(38px,4.8vw,64px);line-height:1.08;margin-bottom:24px}
+.close h2{font-size:clamp(30px,3.6vw,48px);line-height:1.16;margin-bottom:24px}
 .close h2 em{font-style:italic}
 .close p{color:var(--muted);max-width:52ch;margin:0 auto 40px;font-size:16.5px;line-height:1.7}
 .close-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
@@ -408,7 +408,7 @@ footer{background:var(--sand);border-top:1px solid var(--line);color:var(--faint
 /* .eyebrow is display:flex (it carries a gradient rule via ::before), so the parent's
    text-align:center does nothing to it — it needs justify-content. */
 .film .eyebrow{justify-content:center;margin-bottom:22px}
-.film h2{font-size:clamp(30px,3.6vw,46px);line-height:1.12;margin-bottom:20px}
+.film h2{font-size:clamp(25px,2.9vw,37px);line-height:1.2;margin-bottom:20px}
 .film h2 em{font-style:italic}
 .film-lede{color:var(--muted);max-width:60ch;margin:0 auto;font-size:16.5px;line-height:1.7}
 .film-frame{margin-top:40px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0B1220;box-shadow:0 30px 70px -40px rgba(11,18,32,.45)}
