@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Terms of Use | OroDb</title>
+<meta name="description" content="The terms that apply to orodb.com and the interactive demo."/>
+<meta name="robots" content="index, follow"/>
+<link rel="canonical" href="https://orodb.com/terms.html"/>
+<meta property="og:title" content="Terms of Use | OroDb"/>
+<meta property="og:description" content="The terms that apply to orodb.com and the interactive demo."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://orodb.com/terms.html"/>
+<meta property="og:image" content="https://orodb.com/assets/brand/og-light.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="theme-color" content="#F8FAFC" media="(prefers-color-scheme: light)"/>
+<meta name="theme-color" content="#0B1220" media="(prefers-color-scheme: dark)"/>
+<link rel="icon" href="/favicon.ico" sizes="any"/>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+<link rel="manifest" href="/site.webmanifest"/>
+<style>
+@font-face{font-family:'IBM Plex Sans';src:url('assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Sans';src:url('assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'IBM Plex Mono';src:url('assets/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Instrument Serif';src:url('assets/fonts/instrument-serif-latin-400-italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+
+/* Same tokens as index.html so a 404 does not look like a different product. */
+:root{
+  --bg:#F8FAFC; --card:#FFFFFF; --ink:#111827; --muted:#475569; --faint:#64748B;
+  --line:#E2E8F0; --line2:#CBD5E1;
+  --gold:#C6922E; --gold-deep:#8A6516;
+  --action:#2563EB; --action-deep:#1D4ED8; --on-action:#FFFFFF;
+}
+/* Same dark values as index.html. --gold-deep is a TEXT gold on light and would be
+   near-invisible on a dark ground, so it flips to the bright gold. No toggle here:
+   a 404 simply follows whatever the visitor already chose on the site. */
+:root[data-theme="dark"]{
+    --bg:#0B1220; --card:#111827; --ink:#F8FAFC; --muted:#A7B2C3; --faint:#8494A8;
+    --line:#273449; --line2:#3A4A63;
+    --gold:#D4A72C; --gold-deep:#D4A72C;
+    --action:#60A5FA; --action-deep:#93C5FD; --on-action:#0B1220;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1220; --card:#111827; --ink:#F8FAFC; --muted:#A7B2C3; --faint:#8494A8;
+    --line:#273449; --line2:#3A4A63;
+    --gold:#D4A72C; --gold-deep:#D4A72C;
+    --action:#60A5FA; --action-deep:#93C5FD; --on-action:#0B1220;
+  }
+  :root:not([data-theme="light"]) .logo-light{display:none}
+  :root:not([data-theme="light"]) .logo-dark{display:block}
+}
+.logo-dark{display:none}
+:root[data-theme="dark"] .logo-light{display:none}
+:root[data-theme="dark"] .logo-dark{display:block}
+:root[data-theme="light"] .logo-light{display:block}
+:root[data-theme="light"] .logo-dark{display:none}
+:root{
+  --sans:'IBM Plex Sans',system-ui,-apple-system,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --serif:'Instrument Serif',Georgia,serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.7;overflow-x:hidden}
+:root{color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark}}
+:root[data-theme="dark"]{color-scheme:dark}
+.skip-link{position:absolute;top:0;left:0;z-index:400;padding:12px 20px;background:var(--gold-deep);
+  color:var(--bg);font-size:14px;font-weight:600;text-decoration:none;transform:translateY(-110%);transition:transform .14s}
+.skip-link:focus-visible{transform:translateY(0);outline:2px solid var(--ink);outline-offset:2px}
+:focus-visible{outline:2px solid var(--action);outline-offset:3px}
+.wrap{max-width:760px;margin:0 auto;padding:40px 20px 80px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:40px;flex-wrap:wrap}
+.top a.home{display:inline-flex;align-items:center;text-decoration:none}
+.top img{height:26px;width:auto}
+.top .back{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+.top .back:hover{color:var(--gold-deep)}
+h1{font-size:clamp(26px,3.4vw,34px);font-weight:600;letter-spacing:-.01em;margin-bottom:6px;text-wrap:balance}
+.upd{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:26px}
+.draft{border:1px solid var(--gold);border-left:3px solid var(--gold);background:var(--card);
+  padding:14px 18px;margin-bottom:30px;font-size:13.5px;color:var(--muted);border-radius:2px}
+.draft b{color:var(--ink)}
+h2{font-size:17px;font-weight:600;margin:32px 0 10px;color:var(--ink);text-wrap:balance}
+p,li{font-size:14.5px;color:var(--muted);text-wrap:pretty}
+p{margin-bottom:12px}
+ul{padding-left:20px;margin:10px 0 14px}
+li{margin-bottom:6px}
+a{color:var(--action)}
+code{font-family:var(--mono);font-size:12.5px;background:var(--card);border:1px solid var(--line);
+  padding:1px 5px;border-radius:2px;color:var(--ink);overflow-wrap:break-word}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13px;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{color:var(--ink);font-weight:600;white-space:nowrap}
+.blank{background:var(--card);border:1px dashed var(--gold);padding:2px 7px;border-radius:2px;
+  font-family:var(--mono);font-size:12px;color:var(--gold-deep)}
+footer{border-top:1px solid var(--line);margin-top:48px;padding-top:22px;display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+footer a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+footer a:hover{color:var(--gold-deep)}
+footer .c{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-left:auto}
+a,button{touch-action:manipulation}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<div class="wrap">
+  <div class="top">
+    <a class="home" href="/" aria-label="OroDb home">
+      <img class="logo-light" src="assets/brand/logo/orodb-logo-ink.svg" alt="OroDb" width="110" height="26"/>
+      <img class="logo-dark" src="assets/brand/logo/orodb-logo-white.svg" alt="OroDb" width="110" height="26"/>
+    </a>
+    <a class="back" href="/">Back to orodb.com</a>
+  </div>
+  <main id="main" tabindex="-1">
+<h1>Terms of Use</h1><p class="upd">Last updated 14 November 2026</p><div class="draft"><b>Draft, pending legal review.</b> This page describes accurately what the software and this website actually do. It has not been reviewed by a lawyer, and the operator's registered legal name and postal address are not yet stated. Do not rely on it as legal advice.</div>
+<h2>1. What these terms cover</h2>
+<p>These terms apply to this website, orodb.com, and to the interactive demo published on it. The OroDb application is a separate product behind a sign-in and has its own terms, published inside the product at <code>/legal/terms</code>.</p>
+<h2>2. What this site is</h2>
+<p>This site describes a database performance analysis product. It is information, not an offer, and nothing here forms a contract.</p>
+<h2>3. The demo</h2>
+<p>The demo runs in your browser on invented data describing servers that do not exist. It reproduces the product's screens; it is not a connection to any real system. Figures shown in it are illustrative and are not performance claims.</p>
+<h2>4. Acceptable use</h2>
+<p>Do not attempt to disrupt the site, scrape it at a volume that degrades it for others, or reproduce its content as your own.</p>
+<h2>5. Trademarks</h2>
+<p>SQL Server and Azure are trademarks of Microsoft. Oracle and MySQL are trademarks of Oracle. PostgreSQL is a trademark of the PostgreSQL Community Association. They are named here only to say which systems OroDb reads from. None of those companies produce, sponsor or endorse OroDb.</p>
+<h2>6. No warranty</h2>
+<p>This site is provided as it is, without warranty. Availability is not guaranteed.</p>
+<h2>7. Liability</h2>
+<p>To the extent the law allows, no liability is accepted for loss arising from use of this site or the demo. Nothing here limits liability that cannot lawfully be limited.</p>
+<h2>8. Governing law</h2>
+<p>The governing law and the courts with jurisdiction are <span class="blank">TO BE SUPPLIED</span>. This will be stated once confirmed with a lawyer.</p>
+<h2>9. Contact</h2>
+<p><a href="mailto:abhishekjain_aj@outlook.com">abhishekjain_aj@outlook.com</a></p>  </main>
+  <footer>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/terms.html">Terms</a>
+    <a href="/cookies.html">Cookies</a>
+    <a href="mailto:abhishekjain_aj@outlook.com">Contact</a>
+    <span class="c">&copy; 2026 OroDb</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -41,7 +41,7 @@
   --bg:#0B1220; --bg-surface:#080E18; --bg-card:#111827; --bg-card2:#182233;
   --border:#273449; --border-strong:#3A4A63;
   --text-primary:#F8FAFC; --text-secondary:#A7B2C3; --text-muted:#8494A8;
-  --accent:#60A5FA; --cyan:#22D3EE; --green:#4ADE80; --amber:#F59E0B;
+  --accent:#60A5FA; --on-accent:#0B1220; --cyan:#22D3EE; --green:#4ADE80; --amber:#F59E0B;
   --red:#F87171; --purple:#A78BFA; --blue:#60A5FA;
   --cat-cpu:#60A5FA; --cat-io:#22D3EE; --cat-mem:#A78BFA;
   --cat-other:#94A3B8; --cat-lock:#FB923C; --cat-net:#2DD4BF;
@@ -54,7 +54,7 @@
   --bg:#F8FAFC; --bg-surface:#FFFFFF; --bg-card:#FFFFFF; --bg-card2:#F1F5F9;
   --border:#E2E8F0; --border-strong:#CBD5E1;
   --text-primary:#111827; --text-secondary:#475569; --text-muted:#5A6B80;
-  --accent:#2563EB; --blue:#2563EB; --cyan:#0E7490; --green:#15803D;
+  --accent:#2563EB; --on-accent:#FFFFFF; --blue:#2563EB; --cyan:#0E7490; --green:#15803D;
   --amber:#B45309; --red:#DC2626; --purple:#7C3AED;
   --cat-cpu:#2563EB; --cat-io:#0E7490; --cat-mem:#7C3AED;
   --cat-other:#64748B; --cat-lock:#C2410C; --cat-net:#0F766E;
@@ -94,7 +94,7 @@ a{color:var(--accent)}
 .page-title{font-size:21px;font-weight:600;letter-spacing:-.01em;margin-right:auto}
 .sel,.btn{font-family:var(--sans);font-size:13px;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-strong);border-radius:7px;padding:7px 11px;cursor:pointer}
 .sel:hover,.btn:hover{border-color:var(--accent)}
-.btn-act{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+.btn-act{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:500}
 .btn-act:hover{filter:brightness(1.08)}
 .badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border-strong);border-radius:999px;padding:5px 11px;color:var(--text-secondary)}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
@@ -273,7 +273,10 @@ code,.mono{overflow-wrap:break-word}
 <div class="demo-bar">
   <b>Demo</b>
   <span>Synthetic data on a fictional estate. Nothing here touches a real database.
-    <a href="index.html">Back to orodb.com</a></span>
+    <a href="index.html">Back to orodb.com</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <a href="cookies.html">Cookies</a></span>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
