@@ -116,7 +116,10 @@ a,button{touch-action:manipulation}
   <main id="main" tabindex="-1">
 <h1>Privacy Policy</h1><p class="upd">Last updated 14 November 2026</p><div class="draft"><b>Draft, pending legal review.</b> This page describes accurately what the software and this website actually do. It has not been reviewed by a lawyer, and the operator's registered legal name and postal address are not yet stated. Do not rely on it as legal advice.</div>
 <h2>1. Who is responsible</h2>
-<p>OroDb is operated by an individual trading as OroDb. The registered legal name and postal address are <span class="blank">TO BE SUPPLIED</span> and will be published here before the product is sold or listed on a marketplace.</p>
+<p>For the account data this product holds about you, OroDb is the <b>controller</b>. For the
+contents of the databases a customer connects, OroDb acts as a <b>processor</b> on that customer's
+instructions and the customer is the controller; separate processor terms are required for that
+and are not yet in place. OroDb is operated by an individual trading as OroDb. The registered legal name and postal address are <span class="blank">TO BE SUPPLIED</span> and will be published here before the product is sold or listed on a marketplace.</p>
 <p>Contact for any privacy question, including access and deletion requests: <a href="mailto:abhishekjain_aj@outlook.com">abhishekjain_aj@outlook.com</a>.</p>
 <h2>2. This website collects nothing</h2>
 <p>orodb.com is a set of static files. There is no server-side code, no database, no contact form, no analytics, no advertising and no third-party scripts, fonts or embeds. Every font, stylesheet, script and image is served from orodb.com itself.</p>
@@ -131,7 +134,10 @@ a,button{touch-action:manipulation}
 <li>account data: email address, display name, role, and the workspace you belong to;</li>
 <li>sign-in records in an audit log, including the IP address a sign-in came from and an approximate city and country derived from it;</li>
 <li>connection details for the database servers you choose to monitor, with credentials stored encrypted;</li>
-<li>performance telemetry read from those servers, which includes <b>captured SQL query text</b>. Query text can contain personal data if your own application embeds it in queries;</li>
+<li>performance telemetry read from those servers, which includes <b>captured SQL query text</b>,
+which can contain personal data if your own application embeds it in queries. The captured
+statement text is encrypted at rest; <b>execution plan XML is not</b>, and a plan can embed the
+same text and its parameter values;</li>
 <li>an audit trail of actions taken in the product.</li>
 </ul>
 <p>Recipients: Microsoft Azure for hosting and the database, Microsoft Entra ID if you sign in with a Microsoft account, and the email provider configured for your workspace, which is either Resend or an SMTP server you supply. Sign-in codes, invitations, alerts and scheduled reports go out through that provider.</p>
@@ -144,7 +150,15 @@ a,button{touch-action:manipulation}
 <h2>8. Security</h2>
 <p>Credentials for monitored servers are encrypted before storage. The application is served over HTTPS only, sends a Content Security Policy that does not permit inline scripts, and keeps its session cookie HTTP-only. No security measure is perfect and we do not claim otherwise.</p>
 <h2>9. Changes</h2>
-<p>If this policy changes, the date at the top changes with it.</p>  </main>
+<p>If this policy changes, the date at the top changes with it. There is no automated mechanism
+for notifying account holders of a change, so today that would be done by hand.</p>
+
+<h2>10. Which document applies</h2>
+<p>This page covers orodb.com. The application publishes its own, more detailed policy at
+<code>/legal/privacy</code>, which governs the product. Where the two differ on the product, the
+application's policy is the operative one. Both are drafts pending legal review, and both use the
+same contact address; the older <code>privacy@orodb.com</code> address in the application's policy
+is being consolidated to the address above.</p>  </main>
   <footer>
     <a href="/privacy.html">Privacy</a>
     <a href="/terms.html">Terms</a>
