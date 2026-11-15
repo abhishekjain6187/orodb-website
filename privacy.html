@@ -135,9 +135,10 @@ and are not yet in place. OroDb is operated by an individual trading as OroDb. T
 <li>sign-in records in an audit log, including the IP address a sign-in came from and an approximate city and country derived from it;</li>
 <li>connection details for the database servers you choose to monitor, with credentials stored encrypted;</li>
 <li>performance telemetry read from those servers, which includes <b>captured SQL query text</b>,
-which can contain personal data if your own application embeds it in queries. The captured
-statement text is encrypted at rest; <b>execution plan XML is not</b>, and a plan can embed the
-same text and its parameter values;</li>
+which can contain personal data if your own application embeds it in queries. Both the captured
+statement text and the execution plan XML are encrypted at rest, since a plan embeds the same
+text and its parameter values. Plans captured before 14 November 2026 are stored as plain XML
+and are not rewritten;</li>
 <li>an audit trail of actions taken in the product.</li>
 </ul>
 <p>Recipients: Microsoft Azure for hosting and the database, Microsoft Entra ID if you sign in with a Microsoft account, and the email provider configured for your workspace, which is either Resend or an SMTP server you supply. Sign-in codes, invitations, alerts and scheduled reports go out through that provider.</p>
